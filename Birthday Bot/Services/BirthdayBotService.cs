@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
+using Microsoft.EntityFrameworkCore;
 
 namespace Birthday_Bot.Services
 {
@@ -17,9 +18,11 @@ namespace Birthday_Bot.Services
 		private readonly CommandService _commands;
 		private IServiceProvider _provider;
 		private IAPIHandler _apiHandler;
+		private readonly BirthdayContext _dbContext;
 
-		public BirthdayBotService(IServiceProvider provider, DiscordSocketClient discord, CommandService commands, IAPIHandler apiHandler)
+		public BirthdayBotService(IServiceProvider provider, DiscordSocketClient discord, CommandService commands, IAPIHandler apiHandler, BirthdayContext dbContext)
 		{
+			_dbContext = dbContext;
 			_discord = discord;
 			_commands = commands;
 			_provider = provider;
@@ -44,54 +47,49 @@ namespace Birthday_Bot.Services
 
 		public List<Tblguilds> GetGuildInformation()
 		{
-			using (var db = new BirthdayContext())
-			{
-				return db.TblGuilds.ToList();
-			}
+			return _dbContext.TblGuilds.ToList();
 		}
 
 		private async void DateTimeHandler_DayChanged(object sender, DayChangedEventArgs e)
 		{
-			using (var db = new BirthdayContext())
+
+			foreach (var guild in GetGuildInformation())
 			{
-				foreach (var guild in GetGuildInformation())
+				var birthday = _dbContext.TblBirthdays.AsQueryable().Where(d => d.Birthday.Value.Month == DateTime.Now.Month && d.Birthday.Value.Day == DateTime.Now.Day).ToList();
+
+				foreach (var user in birthday.ToList())
 				{
-					var birthday = db.TblBirthdays.AsQueryable().Where(d => d.Birthday.Value.Month == DateTime.Now.Month && d.Birthday.Value.Day == DateTime.Now.Day).ToList();
-
-					foreach (var user in birthday.ToList())
+					if (!await _apiHandler.IsInGuild(guild.Guildid.Value, user.Userid))
 					{
-						if (!await _apiHandler.IsInGuild(guild.Guildid.Value, user.Userid))
-						{
-							birthday.Remove(user);
-						}
+						birthday.Remove(user);
 					}
+				}
 
-					if (birthday.Count > 0)
+				if (birthday.Count > 0)
+				{
+					string _content;
+					if (birthday.Count == 1)
+						_content = "There is 1 birthday today!";
+					else
+						_content = $"There are {birthday.Count} birthdays today!";
+
+					MessageModel message = new MessageModel()
 					{
-						string _content;
-						if (birthday.Count == 1)
-							_content = "There is 1 birthday today!";
-						else
-							_content = $"There are {birthday.Count} birthdays today!";
+						content = _content,
+						tts = false
+					};
 
-						MessageModel message = new MessageModel()
+					await _apiHandler.CreateMessage(message, guild.Channelid.Value);
+
+					foreach (var person in birthday)
+					{
+						MessageModel birthdayMessage = new MessageModel()
 						{
-							content = _content,
+							content = $"It's <@{person.Userid}> birthday today!! Happy birthday!",
 							tts = false
 						};
 
-						await _apiHandler.CreateMessage(message, guild.Channelid.Value);
-
-						foreach (var person in birthday)
-						{
-							MessageModel birthdayMessage = new MessageModel()
-							{
-								content = $"It's <@{person.Userid}> birthday today!! Happy birthday!",
-								tts = false
-							};
-
-							await _apiHandler.CreateMessage(birthdayMessage, guild.Channelid.Value);
-						}
+						await _apiHandler.CreateMessage(birthdayMessage, guild.Channelid.Value);
 					}
 				}
 			}

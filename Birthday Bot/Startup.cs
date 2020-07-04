@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Birthday_Bot.Handlers;
+using Birthday_Bot.Models;
 using Birthday_Bot.Services;
 using Discord;
 using Discord.Addons.Interactive;
@@ -11,6 +12,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,7 +22,7 @@ namespace Birthday_Bot
 	{
 		private readonly DiscordSocketClient _client;
 
-		public static IConfiguration Configuration { get; set; }
+		public IConfiguration Configuration { get; set; }
 
 		public Startup(IConfiguration configuration)
 		{
@@ -47,12 +49,12 @@ namespace Birthday_Bot
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddRazorPages();
+			services.AddSingleton(new BirthdayContext(new DbContextOptionsBuilder<BirthdayContext>().UseNpgsql(Configuration["ConnectionString"]).Options));
 			services.AddSingleton(_client);
 			services.AddSingleton<CommandService>();
 			services.AddSingleton<IAPIHandler, APIHandler>();
-			services.AddSingleton<BirthdayBotService>();
 			services.AddSingleton<InteractiveService>();
+			services.AddSingleton<BirthdayBotService>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -64,10 +66,6 @@ namespace Birthday_Bot
 			});
 
 			app.UseRouting();
-
-			app.UseEndpoints(endpoints => {
-				endpoints.MapControllers();
-			});
 		}
 
 		// Example of a logging handler. This can be re-used by addons
