@@ -22,7 +22,7 @@ namespace Birthday_Bot
 	{
 		private readonly DiscordSocketClient _client;
 
-		public IConfiguration Configuration { get; set; }
+		public static IConfiguration Configuration { get; set; }
 
 		public Startup(IConfiguration configuration)
 		{
@@ -49,7 +49,6 @@ namespace Birthday_Bot
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddSingleton(new BirthdayContext(new DbContextOptionsBuilder<BirthdayContext>().UseNpgsql(Configuration["ConnectionString"]).Options));
 			services.AddSingleton(_client);
 			services.AddSingleton<CommandService>();
 			services.AddSingleton<IAPIHandler, APIHandler>();

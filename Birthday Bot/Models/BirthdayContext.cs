@@ -6,20 +6,25 @@ namespace Birthday_Bot.Models
 {
 	public partial class BirthdayContext : DbContext
 	{
-        private static DbContextOptions<BirthdayContext> _options;
 		public BirthdayContext()
-            : base (_options)
 		{
 		}
 
 		public BirthdayContext(DbContextOptions<BirthdayContext> options)
 			: base(options)
 		{
-            _options = options;
 		}
 
 		public virtual DbSet<Tblbirthdays> TblBirthdays { get; set; }
 		public virtual DbSet<Tblguilds> TblGuilds { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseNpgsql(Startup.Configuration["ConnectionString"]);
+            }
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

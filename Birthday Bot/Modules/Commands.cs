@@ -15,54 +15,55 @@ namespace Birthday_Bot.Modules
 	public class Commands : ModuleBase
 	{
 		public IAPIHandler _apiHandler;
-		private readonly BirthdayContext _dbContext;
 
-		public Commands(IAPIHandler apiHandler, BirthdayContext dbContext)
+		public Commands(IAPIHandler apiHandler)
 		{
 			_apiHandler = apiHandler;
-			_dbContext = dbContext;
 		}
 
 		[Command("next", RunMode = RunMode.Async), Summary("Checks if there are any birthdays within 14 days.")]
 		public async Task CheckBirthdays()
 		{
-			var nextBday = await _dbContext.TblBirthdays.FromSqlRaw("select userid, birthday, comments from tblbirthdays where to_char(birthday,'ddd')::int-to_char(now(),'DDD')::int between 0 and 15;").ToListAsync().ConfigureAwait(false);
-
-			foreach (var user in nextBday.ToList())
+			using (var _dbContext = new BirthdayContext())
 			{
-				if (Context.Guild != null)
+				var nextBday = await _dbContext.TblBirthdays.FromSqlRaw("select userid, birthday, comments from tblbirthdays where to_char(birthday,'ddd')::int-to_char(now(),'DDD')::int between 0 and 15;").ToListAsync().ConfigureAwait(false);
+
+				foreach (var user in nextBday.ToList())
 				{
-					if (!await _apiHandler.IsInGuild((long)Context.Guild.Id, user.Userid).ConfigureAwait(false))
+					if (Context.Guild != null)
 					{
-						nextBday.Remove(user);
+						if (!await _apiHandler.IsInGuild((long)Context.Guild.Id, user.Userid).ConfigureAwait(false))
+						{
+							nextBday.Remove(user);
+						}
+					}
+					else
+					{
+						break;
 					}
 				}
-				else
+
+				if (nextBday.Count > 0)
 				{
-					break;
-				}			
-			}
+					string _content;
+					if (nextBday.Count == 1)
+						_content = "There is 1 upcoming birthday!";
+					else
+						_content = $"There are {nextBday.Count} upcoming birthdays!";
 
-			if (nextBday.Count > 0)
-			{
-				string _content;
-				if (nextBday.Count == 1)
-					_content = "There is 1 upcoming birthday!";
-				else
-					_content = $"There are {nextBday.Count} upcoming birthdays!";
+					await ReplyAsync(_content).ConfigureAwait(false);
 
-				await ReplyAsync(_content).ConfigureAwait(false);
-
-				string message = $"The next person's birthday is:";
-				foreach (var person in nextBday)
-				{
-					message += $"\n<@{person.Userid}> on {person.Birthday.Value.ToString("MMMM dd")}!";	
+					string message = $"The next person's birthday is:";
+					foreach (var person in nextBday)
+					{
+						message += $"\n<@{person.Userid}> on {person.Birthday.Value.ToString("MMMM dd")}!";
+					}
+					await ReplyAsync(message).ConfigureAwait(false);
 				}
-				await ReplyAsync(message).ConfigureAwait(false);
-			}
-			else
-			{
-				await ReplyAsync("There are no birthdays in the next 14 days!").ConfigureAwait(false);
+				else
+				{
+					await ReplyAsync("There are no birthdays in the next 14 days!").ConfigureAwait(false);
+				}
 			}
 		}
 
@@ -76,30 +77,32 @@ namespace Birthday_Bot.Modules
 			if (month.Length == 1)
 				month = "0" + month;
 			DateTime.TryParseExact(month, formats, new CultureInfo("en-US"), DateTimeStyles.None, out parsedMonth);
-
-			//var nextBday = db.TblBirthdays.Where(id => id.Birthday.Value.Month == parsedMonth.Month).OrderBy(bday => bday.Birthday.Value.Day).ToList();
-			var nextBday = await _dbContext.TblBirthdays.FromSqlRaw($"SELECT userid, birthday, comments FROM tblbirthdays WHERE EXTRACT(MONTH FROM birthday) = {parsedMonth.Month} ORDER BY birthday").ToListAsync().ConfigureAwait(false);
-
-			if (nextBday.Count > 0)
+			using (var _dbContext = new BirthdayContext())
 			{
-				string _content;
-				if (nextBday.Count == 1)
-					_content = $"There is 1 birthday in the month of {parsedMonth.ToString("MMMM")}!";
-				else
-					_content = $"There are {nextBday.Count} birthdays in the month of {parsedMonth.ToString("MMMM")}!";
+				//var nextBday = db.TblBirthdays.Where(id => id.Birthday.Value.Month == parsedMonth.Month).OrderBy(bday => bday.Birthday.Value.Day).ToList();
+				var nextBday = await _dbContext.TblBirthdays.FromSqlRaw($"SELECT userid, birthday, comments FROM tblbirthdays WHERE EXTRACT(MONTH FROM birthday) = {parsedMonth.Month} ORDER BY birthday").ToListAsync().ConfigureAwait(false);
 
-				await ReplyAsync(_content).ConfigureAwait(false);
-
-				string message = $"Birthdays found in this month are:";
-				foreach (var person in nextBday)
+				if (nextBday.Count > 0)
 				{
-					message += $"\n<@{person.Userid}> on {person.Birthday.Value.ToString("MMMM dd")}!";
+					string _content;
+					if (nextBday.Count == 1)
+						_content = $"There is 1 birthday in the month of {parsedMonth.ToString("MMMM")}!";
+					else
+						_content = $"There are {nextBday.Count} birthdays in the month of {parsedMonth.ToString("MMMM")}!";
+
+					await ReplyAsync(_content).ConfigureAwait(false);
+
+					string message = $"Birthdays found in this month are:";
+					foreach (var person in nextBday)
+					{
+						message += $"\n<@{person.Userid}> on {person.Birthday.Value.ToString("MMMM dd")}!";
+					}
+					await ReplyAsync(message).ConfigureAwait(false);
 				}
-				await ReplyAsync(message).ConfigureAwait(false);
-			}
-			else
-			{
-				await ReplyAsync("There are no birthdays in this month!").ConfigureAwait(false);
+				else
+				{
+					await ReplyAsync("There are no birthdays in this month!").ConfigureAwait(false);
+				}
 			}
 		}
 
@@ -107,18 +110,20 @@ namespace Birthday_Bot.Modules
 		[Command("when")]
 		public async Task WhenIsBirthday([Remainder] string UserID)
 		{
-			//if (_dbContext.TblBirthdays.AsQueryable().Where(id => id.Userid == Convert.ToInt64(UserID)).Any())
-			var person = await _dbContext.TblBirthdays.FindAsync(Convert.ToInt64(UserID));
-
-			if (person != null)
+			using (var _dbContext = new BirthdayContext())
 			{
-				await ReplyAsync($"<@{person.Userid}>'s Birthday is on {person.Birthday.Value.ToString("MMMM dd")}");
-			}
-			else
-			{
-				await ReplyAsync("This person does not have a birthday registered in our database!");
-			}
+				//if (_dbContext.TblBirthdays.AsQueryable().Where(id => id.Userid == Convert.ToInt64(UserID)).Any())
+				var person = await _dbContext.TblBirthdays.FindAsync(Convert.ToInt64(UserID));
 
+				if (person != null)
+				{
+					await ReplyAsync($"<@{person.Userid}>'s Birthday is on {person.Birthday.Value.ToString("MMMM dd")}");
+				}
+				else
+				{
+					await ReplyAsync("This person does not have a birthday registered in our database!");
+				}
+			}
 		}
 	}
 
@@ -126,52 +131,49 @@ namespace Birthday_Bot.Modules
 	[Group("bcast")]
 	public class RegistrationModule : ModuleBase
 	{
-		private readonly BirthdayContext _dbContext;
-
-		public RegistrationModule(BirthdayContext dbContext)
-		{
-			_dbContext = dbContext;
-		}
 
 		[Command("set"), Summary("Sets a new channel to broadcast birthdays in.")]
 		public async Task SetToChannel()
 		{
 			Tblguilds guild = new Tblguilds() { Guildid = (long)Context.Guild.Id, Channelid = (long)Context.Channel.Id };
 
-
-			if (!_dbContext.TblGuilds.Any(o => o.Guildid == guild.Guildid))
+			using (var _dbContext = new BirthdayContext())
 			{
-				_dbContext.Add(new Tblguilds() { Guildid = (long)Context.Guild.Id, Channelid = (long)Context.Channel.Id });
-				await _dbContext.SaveChangesAsync();
-				await ReplyAsync("Birthday messages will now be broadcasted to this channel.");
+				if (!_dbContext.TblGuilds.Any(o => o.Guildid == guild.Guildid))
+				{
+					_dbContext.Add(new Tblguilds() { Guildid = (long)Context.Guild.Id, Channelid = (long)Context.Channel.Id });
+					await _dbContext.SaveChangesAsync();
+					await ReplyAsync("Birthday messages will now be broadcasted to this channel.");
+				}
+				else if (_dbContext.TblGuilds.Any(o => o.Guildid == guild.Guildid && o.Channelid != guild.Channelid))
+				{
+					_dbContext.Update(new Tblguilds() { Guildid = (long)Context.Guild.Id, Channelid = (long)Context.Channel.Id });
+					await _dbContext.SaveChangesAsync();
+					await ReplyAsync("Broadcasting channel has been changed. Birthday messages will now be posted here.");
+				}
+				else
+				{
+					await ReplyAsync("Messages are already being posted in the current channel.");
+				}
 			}
-			else if (_dbContext.TblGuilds.Any(o => o.Guildid == guild.Guildid && o.Channelid != guild.Channelid))
-			{
-				_dbContext.Update(new Tblguilds() { Guildid = (long)Context.Guild.Id, Channelid = (long)Context.Channel.Id });
-				await _dbContext.SaveChangesAsync();
-				await ReplyAsync("Broadcasting channel has been changed. Birthday messages will now be posted here.");
-			}
-			else
-			{
-				await ReplyAsync("Messages are already being posted in the current channel.");
-			}
-
 		}
 
 		[Command("remove"), Summary("Stops broadcasting birthdays to the server.")]
 		public async Task RemoveFromChannel()
 		{
 			Tblguilds guild = new Tblguilds() { Guildid = (long)Context.Guild.Id, Channelid = (long)Context.Channel.Id };
-
-			if (_dbContext.TblGuilds.Any(o=> o.Guildid == guild.Guildid))
+			using (var _dbContext = new BirthdayContext())
 			{
-				_dbContext.Remove(guild);
-				await _dbContext.SaveChangesAsync();
-				await ReplyAsync("The current broadcasting channel has been removed.");
-			}
-			else
-			{
-				await ReplyAsync("This discord guild does not have a channel listed for broadcasting.");
+				if (_dbContext.TblGuilds.Any(o => o.Guildid == guild.Guildid))
+				{
+					_dbContext.Remove(guild);
+					await _dbContext.SaveChangesAsync();
+					await ReplyAsync("The current broadcasting channel has been removed.");
+				}
+				else
+				{
+					await ReplyAsync("This discord guild does not have a channel listed for broadcasting.");
+				}
 			}
 		}
 	}
