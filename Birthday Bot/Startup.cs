@@ -41,8 +41,8 @@ namespace Birthday_Bot
 			Task.Run(async () =>
 			{
 				// Login and connect.
-				await _client.LoginAsync(TokenType.Bot, Configuration["BotToken"]);
-				await _client.StartAsync();
+				await _client.LoginAsync(TokenType.Bot, Configuration["BotToken"]).ConfigureAwait(false);
+				await _client.StartAsync().ConfigureAwait(false);
 			});
 		}
 

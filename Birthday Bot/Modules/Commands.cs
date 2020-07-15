@@ -185,18 +185,13 @@ namespace Birthday_Bot.Modules
 		[Command("help")]
 		public async Task Help()
 		{
-			await Context.User.SendMessageAsync(
-				"Here is a list of commands:\n" +
-				"```\n" +
-				"ADMIN COMMANDS:\n\n" +
-				"!bcast set - Assigns the current channel to the broadcasting list.\n" +
-				"!bcast remove - Removes the bot from broadcasting to the guild.\n" +
-				"```\n" +
-				"```\n" +
-				"USER COMMANDS:\n\n" +
-				"!bday next - Broadcast a list of birthdays within the next 14 days.\n" +
-				"```"
-				).ConfigureAwait(false);
+			var builder = new EmbedBuilder()
+								.WithTitle("List of Commands:")
+								.WithColor(new Color(0xBC00F3))
+								.AddField("Admin Commands", "`!bcast set` - Assigns the current channel to the broadcasting list.\n`!bcast remove` - Removes the bot from broadcasting to the guild.")
+								.AddField("User Commands", "`!bday next` - Broadcast a list of birthdays within the next 14 days.\n`!bday m MONTH` - Broadcast a list of birthdays in the specified month. Valid formats: 12, Dec, December.\n");
+			var embed = builder.Build();
+			await Context.Channel.SendMessageAsync(null, embed: embed).ConfigureAwait(false);
 		}
 	}
 
