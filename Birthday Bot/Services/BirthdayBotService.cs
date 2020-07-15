@@ -26,21 +26,13 @@ namespace Birthday_Bot.Services
 			_provider = provider;
 			_apiHandler = apiHandler;
 			_discord.MessageReceived += HandleCommandAsync;
-			_discord.Ready += OnReady;
 			DateTimeHandler.DayChanged += DateTimeHandler_DayChanged;
-		}
-
-		private async Task OnReady()
-		{
-			Console.WriteLine("Bot is ready");
-			//var user = _discord.GetUser(236922795781521410);
-			//await user.SendMessageAsync("Bitch");
 		}
 
 		public async Task InitializeAsync(IServiceProvider provider)
 		{
 			_provider = provider;
-			await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
+			await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _provider).ConfigureAwait(false);
 		}
 
 		public List<Tblguilds> GetGuildInformation()
@@ -81,7 +73,7 @@ namespace Birthday_Bot.Services
 							tts = false
 						};
 
-						await _apiHandler.CreateMessage(message, guild.Channelid.Value);
+						await _apiHandler.CreateMessage(message, guild.Channelid.Value).ConfigureAwait(false);
 
 						foreach (var person in birthday)
 						{
@@ -91,7 +83,7 @@ namespace Birthday_Bot.Services
 								tts = false
 							};
 
-							await _apiHandler.CreateMessage(birthdayMessage, guild.Channelid.Value);
+							await _apiHandler.CreateMessage(birthdayMessage, guild.Channelid.Value).ConfigureAwait(false);
 						}
 					}
 				}
@@ -119,7 +111,7 @@ namespace Birthday_Bot.Services
 
 				// Execute the command. (result does not indicate a return value, 
 				// rather an object stating if the command executed succesfully).
-				var result = await _commands.ExecuteAsync(context, pos, _provider);
+				var result = await _commands.ExecuteAsync(context, pos, _provider).ConfigureAwait(false);
 
 				// Uncomment the following lines if you want the bot
 				// to send a message if it failed (not advised for most situations).

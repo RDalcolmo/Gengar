@@ -113,15 +113,15 @@ namespace Birthday_Bot.Modules
 			using (var _dbContext = new BirthdayContext())
 			{
 				//if (_dbContext.TblBirthdays.AsQueryable().Where(id => id.Userid == Convert.ToInt64(UserID)).Any())
-				var person = await _dbContext.TblBirthdays.FindAsync(Convert.ToInt64(UserID));
+				var person = await _dbContext.TblBirthdays.FindAsync(Convert.ToInt64(UserID)).ConfigureAwait(false);
 
 				if (person != null)
 				{
-					await ReplyAsync($"<@{person.Userid}>'s Birthday is on {person.Birthday.Value.ToString("MMMM dd")}");
+					await ReplyAsync($"<@{person.Userid}>'s Birthday is on {person.Birthday.Value.ToString("MMMM dd")}").ConfigureAwait(false);
 				}
 				else
 				{
-					await ReplyAsync("This person does not have a birthday registered in our database!");
+					await ReplyAsync("This person does not have a birthday registered in our database!").ConfigureAwait(false);
 				}
 			}
 		}
@@ -135,44 +135,46 @@ namespace Birthday_Bot.Modules
 		[Command("set"), Summary("Sets a new channel to broadcast birthdays in.")]
 		public async Task SetToChannel()
 		{
-			Tblguilds guild = new Tblguilds() { Guildid = (long)Context.Guild.Id, Channelid = (long)Context.Channel.Id };
 
 			using (var _dbContext = new BirthdayContext())
 			{
-				if (!_dbContext.TblGuilds.Any(o => o.Guildid == guild.Guildid))
+				var guild = await _dbContext.TblGuilds.AsAsyncEnumerable().FirstOrDefaultAsync(g => g.Guildid == (long)Context.Guild.Id).ConfigureAwait(false);
+
+				if (guild == null)
 				{
 					_dbContext.Add(new Tblguilds() { Guildid = (long)Context.Guild.Id, Channelid = (long)Context.Channel.Id });
-					await _dbContext.SaveChangesAsync();
-					await ReplyAsync("Birthday messages will now be broadcasted to this channel.");
+					await ReplyAsync("Birthday messages will now be broadcasted to this channel.").ConfigureAwait(false);
 				}
-				else if (_dbContext.TblGuilds.Any(o => o.Guildid == guild.Guildid && o.Channelid != guild.Channelid))
+				else if (guild.Channelid != (long)Context.Channel.Id)
 				{
-					_dbContext.Update(new Tblguilds() { Guildid = (long)Context.Guild.Id, Channelid = (long)Context.Channel.Id });
-					await _dbContext.SaveChangesAsync();
-					await ReplyAsync("Broadcasting channel has been changed. Birthday messages will now be posted here.");
+					guild.Channelid = (long)Context.Channel.Id;
+					await ReplyAsync("Broadcasting channel has been changed. Birthday messages will now be posted here.").ConfigureAwait(false);
 				}
 				else
 				{
-					await ReplyAsync("Messages are already being posted in the current channel.");
+					await ReplyAsync("Messages are already being posted in the current channel.").ConfigureAwait(false);
 				}
+
+				await _dbContext.SaveChangesAsync().ConfigureAwait(false);
 			}
 		}
 
 		[Command("remove"), Summary("Stops broadcasting birthdays to the server.")]
 		public async Task RemoveFromChannel()
 		{
-			Tblguilds guild = new Tblguilds() { Guildid = (long)Context.Guild.Id, Channelid = (long)Context.Channel.Id };
 			using (var _dbContext = new BirthdayContext())
 			{
-				if (_dbContext.TblGuilds.Any(o => o.Guildid == guild.Guildid))
+				var guild = await _dbContext.TblGuilds.AsAsyncEnumerable().FirstOrDefaultAsync(g => g.Guildid == (long)Context.Guild.Id).ConfigureAwait(false);
+
+				if (guild != null)
 				{
 					_dbContext.Remove(guild);
-					await _dbContext.SaveChangesAsync();
-					await ReplyAsync("The current broadcasting channel has been removed.");
+					await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+					await ReplyAsync("The current broadcasting channel has been removed.").ConfigureAwait(false);
 				}
 				else
 				{
-					await ReplyAsync("This discord guild does not have a channel listed for broadcasting.");
+					await ReplyAsync("This discord guild does not have a channel listed for broadcasting.").ConfigureAwait(false);
 				}
 			}
 		}
@@ -194,7 +196,7 @@ namespace Birthday_Bot.Modules
 				"USER COMMANDS:\n\n" +
 				"!bday next - Broadcast a list of birthdays within the next 14 days.\n" +
 				"```"
-				);
+				).ConfigureAwait(false);
 		}
 	}
 
@@ -204,7 +206,7 @@ namespace Birthday_Bot.Modules
 		[Command("now")]
 		public async Task Help()
 		{
-			await ReplyAsync($"Current time is: {DateTime.Now.ToString("h:mm:ss tt")}");
+			await ReplyAsync($"Current time is: {DateTime.Now.ToString("h:mm:ss tt")}").ConfigureAwait(false);
 			//await ReplyAsync($"Current time is: {DateTime.Now.ToString("h:mm:ss tt")}");
 		}
 	}
@@ -214,13 +216,13 @@ namespace Birthday_Bot.Modules
 		[Command("cookie")]
 		public async Task Cookie()
 		{
-			await ReplyAsync($"Have a cookie!! <:skyerafLove:577608611099050025>");
+			await ReplyAsync($"Have a cookie!! <:skyerafLove:577608611099050025>").ConfigureAwait(false);
 		}
 
 		[Command("cake")]
 		public async Task Cake()
 		{
-			await ReplyAsync($"Sorry, cakes are only for those who have a birthday");
+			await ReplyAsync($"Sorry, cakes are only for those who have a birthday").ConfigureAwait(false);
 		}
 
 		//[Command("shoutout", RunMode = RunMode.Async)]
