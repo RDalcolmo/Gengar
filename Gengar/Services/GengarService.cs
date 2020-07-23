@@ -50,7 +50,7 @@ namespace Gengar.Services
 					var Guild = _discord.GetGuild((ulong)guild.Guildid);
 					var Channel = Guild.GetTextChannel((ulong)guild.Channelid);
 
-					var birthday = _dbContext.TblBirthdays.AsQueryable().Where(d => d.Birthday.Value.Month == DateTime.Now.Month && d.Birthday.Value.Day == DateTime.Now.Day).ToList();
+					var birthday = _dbContext.TblBirthdays.AsQueryable().Where(d => d.Birthday.Month == DateTime.Now.Month && d.Birthday.Day == DateTime.Now.Day).ToList();
 
 					foreach (var user in birthday.ToList())
 					{

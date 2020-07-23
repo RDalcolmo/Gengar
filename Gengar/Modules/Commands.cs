@@ -21,11 +21,11 @@ namespace Gengar.Modules
 			{
 				var nextBday = await _dbContext.TblBirthdays.FromSqlRaw("select userid, birthday, comments from tblbirthdays where to_char(birthday,'ddd')::int-to_char(now(),'DDD')::int between 0 and 15;").ToListAsync().ConfigureAwait(false);
 
-				foreach (var user in nextBday.ToList())
+				foreach (var user in nextBday)
 				{
 					if (Context.Guild != null)
 					{
-						if (await Context.Guild.GetUserAsync((ulong)user.Userid) == null)
+						if (await Context.Guild.GetUserAsync((ulong)user.Userid).ConfigureAwait(false) == null)
 						{
 							nextBday.Remove(user);
 						}
@@ -47,9 +47,9 @@ namespace Gengar.Modules
 					await ReplyAsync(_content).ConfigureAwait(false);
 
 					string message = $"The next person's birthday is:";
-					foreach (var person in nextBday)
+					foreach (var person in nextBday.OrderBy(m => m.Birthday.Month).ThenBy(d => d.Birthday.Day))
 					{
-						message += $"\n<@{person.Userid}> on {person.Birthday.Value.ToString("MMMM dd")}!";
+						message += $"\n<@{person.Userid}> on {person.Birthday.ToString("MMMM dd")}!";
 					}
 					await ReplyAsync(message).ConfigureAwait(false);
 				}
@@ -89,7 +89,7 @@ namespace Gengar.Modules
 					string message = $"Birthdays found in this month are:";
 					foreach (var person in nextBday)
 					{
-						message += $"\n<@{person.Userid}> on {person.Birthday.Value.ToString("MMMM dd")}!";
+						message += $"\n<@{person.Userid}> on {person.Birthday.ToString("MMMM dd")}!";
 					}
 					await ReplyAsync(message).ConfigureAwait(false);
 				}
@@ -111,7 +111,7 @@ namespace Gengar.Modules
 
 				if (person != null)
 				{
-					await ReplyAsync($"<@{person.Userid}>'s Birthday is on {person.Birthday.Value.ToString("MMMM dd")}").ConfigureAwait(false);
+					await ReplyAsync($"<@{person.Userid}>'s Birthday is on {person.Birthday.ToString("MMMM dd")}").ConfigureAwait(false);
 				}
 				else
 				{
