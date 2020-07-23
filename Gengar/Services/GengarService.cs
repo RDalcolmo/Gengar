@@ -1,5 +1,5 @@
-﻿using Birthday_Bot.Handlers;
-using Birthday_Bot.Models;
+﻿using Gengar.Handlers;
+using Gengar.Models;
 using Discord.Commands;
 using Discord.WebSocket;
 using System;
@@ -10,21 +10,19 @@ using System.Threading.Tasks;
 using Discord;
 using Microsoft.EntityFrameworkCore;
 
-namespace Birthday_Bot.Services
+namespace Gengar.Services
 {
-	public class BirthdayBotService
+	public class GengarService
 	{
 		private readonly DiscordSocketClient _discord;
 		private readonly CommandService _commands;
 		private IServiceProvider _provider;
-		private IAPIHandler _apiHandler;
 
-		public BirthdayBotService(IServiceProvider provider, DiscordSocketClient discord, CommandService commands, IAPIHandler apiHandler)
+		public GengarService(IServiceProvider provider, DiscordSocketClient discord, CommandService commands)
 		{
 			_discord = discord;
 			_commands = commands;
 			_provider = provider;
-			_apiHandler = apiHandler;
 			_discord.MessageReceived += HandleCommandAsync;
 			DateTimeHandler.DayChanged += DateTimeHandler_DayChanged;
 		}
@@ -37,7 +35,7 @@ namespace Birthday_Bot.Services
 
 		public List<Tblguilds> GetGuildInformation()
 		{
-			using (var _dbContext = new BirthdayContext())
+			using (var _dbContext = new GengarContext())
 			{
 				return _dbContext.TblGuilds.ToList();
 			}
@@ -45,15 +43,18 @@ namespace Birthday_Bot.Services
 
 		private async void DateTimeHandler_DayChanged(object sender, DayChangedEventArgs e)
 		{
-			using (var _dbContext = new BirthdayContext())
+			using (var _dbContext = new GengarContext())
 			{
 				foreach (var guild in GetGuildInformation())
 				{
+					var Guild = _discord.GetGuild((ulong)guild.Guildid);
+					var Channel = Guild.GetTextChannel((ulong)guild.Channelid);
+
 					var birthday = _dbContext.TblBirthdays.AsQueryable().Where(d => d.Birthday.Value.Month == DateTime.Now.Month && d.Birthday.Value.Day == DateTime.Now.Day).ToList();
 
 					foreach (var user in birthday.ToList())
 					{
-						if (!await _apiHandler.IsInGuild(guild.Guildid.Value, user.Userid))
+						if (Guild.GetUser((ulong)user.Userid) == null)
 						{
 							birthday.Remove(user);
 						}
@@ -67,23 +68,13 @@ namespace Birthday_Bot.Services
 						else
 							_content = $"There are {birthday.Count} birthdays today!";
 
-						MessageModel message = new MessageModel()
-						{
-							content = _content,
-							tts = false
-						};
 
-						await _apiHandler.CreateMessage(message, guild.Channelid.Value).ConfigureAwait(false);
+
+						await Channel.SendMessageAsync(_content).ConfigureAwait(false);
 
 						foreach (var person in birthday)
 						{
-							MessageModel birthdayMessage = new MessageModel()
-							{
-								content = $"It's <@{person.Userid}> birthday today!! Happy birthday!",
-								tts = false
-							};
-
-							await _apiHandler.CreateMessage(birthdayMessage, guild.Channelid.Value).ConfigureAwait(false);
+							await Channel.SendMessageAsync($"It's <@{person.Userid}> birthday today!! Happy birthday!").ConfigureAwait(false);
 						}
 					}
 				}
@@ -111,7 +102,7 @@ namespace Birthday_Bot.Services
 
 				// Execute the command. (result does not indicate a return value, 
 				// rather an object stating if the command executed succesfully).
-				var result = await _commands.ExecuteAsync(context, pos, _provider).ConfigureAwait(false);
+				await _commands.ExecuteAsync(context, pos, _provider).ConfigureAwait(false);
 
 				// Uncomment the following lines if you want the bot
 				// to send a message if it failed (not advised for most situations).

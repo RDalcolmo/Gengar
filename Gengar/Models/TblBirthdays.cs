@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace Birthday_Bot.Models
+namespace Gengar.Models
 {
     public partial class Tblbirthdays
     {

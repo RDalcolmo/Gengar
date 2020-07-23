@@ -1,22 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
-using Birthday_Bot.Handlers;
-using Birthday_Bot.Models;
-using Birthday_Bot.Services;
+using Gengar.Services;
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Birthday_Bot
+namespace Gengar
 {
 	public class Startup
 	{
@@ -51,9 +45,8 @@ namespace Birthday_Bot
 		{
 			services.AddSingleton(_client);
 			services.AddSingleton<CommandService>();
-			services.AddSingleton<IAPIHandler, APIHandler>();
 			services.AddSingleton<InteractiveService>();
-			services.AddSingleton<BirthdayBotService>();
+			services.AddSingleton<GengarService>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -61,7 +54,7 @@ namespace Birthday_Bot
 		{
 			Task.Run(async () =>
 			{
-				await app.ApplicationServices.GetRequiredService<BirthdayBotService>().InitializeAsync(app.ApplicationServices);
+				await app.ApplicationServices.GetRequiredService<GengarService>().InitializeAsync(app.ApplicationServices);
 			});
 
 			app.UseRouting();

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 
-namespace Birthday_Bot.Handlers
+namespace Gengar.Handlers
 {
 	public class DateTimeHandler
 	{

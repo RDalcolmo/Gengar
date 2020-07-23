@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29123.88
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Birthday Bot", "Birthday Bot\Birthday Bot.csproj", "{59E68456-61F5-4C3A-97AB-862E2B0A3CF0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gengar", "Gengar\Gengar.csproj", "{59E68456-61F5-4C3A-97AB-862E2B0A3CF0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

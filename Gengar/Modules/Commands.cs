@@ -1,30 +1,23 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Birthday_Bot.Models;
+using Gengar.Models;
 using Discord.Commands;
-using Birthday_Bot.Handlers;
+using Gengar.Handlers;
 using Discord;
 using Discord.Addons.Interactive;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 
-namespace Birthday_Bot.Modules
+namespace Gengar.Modules
 {
 	[Group("bday")]
 	public class Commands : ModuleBase
 	{
-		public IAPIHandler _apiHandler;
-
-		public Commands(IAPIHandler apiHandler)
-		{
-			_apiHandler = apiHandler;
-		}
-
 		[Command("next", RunMode = RunMode.Async), Summary("Checks if there are any birthdays within 14 days.")]
 		public async Task CheckBirthdays()
 		{
-			using (var _dbContext = new BirthdayContext())
+			using (var _dbContext = new GengarContext())
 			{
 				var nextBday = await _dbContext.TblBirthdays.FromSqlRaw("select userid, birthday, comments from tblbirthdays where to_char(birthday,'ddd')::int-to_char(now(),'DDD')::int between 0 and 15;").ToListAsync().ConfigureAwait(false);
 
@@ -32,7 +25,7 @@ namespace Birthday_Bot.Modules
 				{
 					if (Context.Guild != null)
 					{
-						if (!await _apiHandler.IsInGuild((long)Context.Guild.Id, user.Userid).ConfigureAwait(false))
+						if (await Context.Guild.GetUserAsync((ulong)user.Userid) == null)
 						{
 							nextBday.Remove(user);
 						}
@@ -67,8 +60,9 @@ namespace Birthday_Bot.Modules
 			}
 		}
 
-		[Command("month", RunMode = RunMode.Async)]
+		[Command("month")]
 		[Alias("m")]
+		[RequireContext(ContextType.DM)]
 		public async Task BirthdayInMonth([Remainder] string month)
 		{
 
@@ -77,7 +71,7 @@ namespace Birthday_Bot.Modules
 			if (month.Length == 1)
 				month = "0" + month;
 			DateTime.TryParseExact(month, formats, new CultureInfo("en-US"), DateTimeStyles.None, out parsedMonth);
-			using (var _dbContext = new BirthdayContext())
+			using (var _dbContext = new GengarContext())
 			{
 				//var nextBday = db.TblBirthdays.Where(id => id.Birthday.Value.Month == parsedMonth.Month).OrderBy(bday => bday.Birthday.Value.Day).ToList();
 				var nextBday = await _dbContext.TblBirthdays.FromSqlRaw($"SELECT userid, birthday, comments FROM tblbirthdays WHERE EXTRACT(MONTH FROM birthday) = {parsedMonth.Month} ORDER BY birthday").ToListAsync().ConfigureAwait(false);
@@ -106,11 +100,11 @@ namespace Birthday_Bot.Modules
 			}
 		}
 
-		[RequireContext(ContextType.DM)]
 		[Command("when")]
+		[RequireContext(ContextType.DM)]
 		public async Task WhenIsBirthday([Remainder] string UserID)
 		{
-			using (var _dbContext = new BirthdayContext())
+			using (var _dbContext = new GengarContext())
 			{
 				//if (_dbContext.TblBirthdays.AsQueryable().Where(id => id.Userid == Convert.ToInt64(UserID)).Any())
 				var person = await _dbContext.TblBirthdays.FindAsync(Convert.ToInt64(UserID)).ConfigureAwait(false);
@@ -127,8 +121,10 @@ namespace Birthday_Bot.Modules
 		}
 	}
 
-	[RequireUserPermission(GuildPermission.Administrator)]
+	
 	[Group("bcast")]
+	[RequireUserPermission(GuildPermission.ManageGuild)]
+	[RequireContext(ContextType.Guild)]
 	public class RegistrationModule : ModuleBase
 	{
 
@@ -136,7 +132,7 @@ namespace Birthday_Bot.Modules
 		public async Task SetToChannel()
 		{
 
-			using (var _dbContext = new BirthdayContext())
+			using (var _dbContext = new GengarContext())
 			{
 				var guild = await _dbContext.TblGuilds.AsAsyncEnumerable().FirstOrDefaultAsync(g => g.Guildid == (long)Context.Guild.Id).ConfigureAwait(false);
 
@@ -162,7 +158,7 @@ namespace Birthday_Bot.Modules
 		[Command("remove"), Summary("Stops broadcasting birthdays to the server.")]
 		public async Task RemoveFromChannel()
 		{
-			using (var _dbContext = new BirthdayContext())
+			using (var _dbContext = new GengarContext())
 			{
 				var guild = await _dbContext.TblGuilds.AsAsyncEnumerable().FirstOrDefaultAsync(g => g.Guildid == (long)Context.Guild.Id).ConfigureAwait(false);
 
@@ -192,17 +188,6 @@ namespace Birthday_Bot.Modules
 								.AddField("User Commands", "`!bday next` - Broadcast a list of birthdays within the next 14 days.\n`!bday m MONTH` - Broadcast a list of birthdays in the specified month. Valid formats: 12, Dec, December.\n");
 			var embed = builder.Build();
 			await Context.Channel.SendMessageAsync(null, embed: embed).ConfigureAwait(false);
-		}
-	}
-
-	[Group("time")]
-	public class TimeModule : ModuleBase
-	{
-		[Command("now")]
-		public async Task Help()
-		{
-			await ReplyAsync($"Current time is: {DateTime.Now.ToString("h:mm:ss tt")}").ConfigureAwait(false);
-			//await ReplyAsync($"Current time is: {DateTime.Now.ToString("h:mm:ss tt")}");
 		}
 	}
 

@@ -2,15 +2,15 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace Birthday_Bot.Models
+namespace Gengar.Models
 {
-	public partial class BirthdayContext : DbContext
+	public partial class GengarContext : DbContext
 	{
-		public BirthdayContext()
+		public GengarContext()
 		{
 		}
 
-		public BirthdayContext(DbContextOptions<BirthdayContext> options)
+		public GengarContext(DbContextOptions<GengarContext> options)
 			: base(options)
 		{
 		}
