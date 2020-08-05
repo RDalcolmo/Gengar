@@ -20,19 +20,17 @@ namespace Gengar.Modules
 			using (var _dbContext = new GengarContext())
 			{
 				var nextBday = await _dbContext.TblBirthdays.FromSqlRaw("select userid, birthday, comments from tblbirthdays where to_char(birthday,'ddd')::int-to_char(now(),'DDD')::int between 0 and 15;").ToListAsync().ConfigureAwait(false);
-
-				foreach (var user in nextBday)
+				
+				if (Context.Guild != null)
 				{
-					if (Context.Guild != null)
+					foreach (var user in nextBday.ToList())
 					{
+
 						if (await Context.Guild.GetUserAsync((ulong)user.Userid).ConfigureAwait(false) == null)
 						{
 							nextBday.Remove(user);
 						}
-					}
-					else
-					{
-						break;
+
 					}
 				}
 
@@ -66,7 +64,7 @@ namespace Gengar.Modules
 		public async Task BirthdayInMonth([Remainder] string month)
 		{
 
-			string[] formats = { "M", "MM", "MMM", "MMMM"};
+			string[] formats = { "M", "MM", "MMM", "MMMM" };
 			DateTime parsedMonth;
 			if (month.Length == 1)
 				month = "0" + month;
@@ -121,7 +119,7 @@ namespace Gengar.Modules
 		}
 	}
 
-	
+
 	[Group("bcast")]
 	[RequireUserPermission(GuildPermission.ManageGuild)]
 	[RequireContext(ContextType.Guild)]
