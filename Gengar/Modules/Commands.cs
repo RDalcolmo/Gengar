@@ -8,6 +8,7 @@ using Discord;
 using Discord.Addons.Interactive;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using Microsoft.VisualBasic;
 
 namespace Gengar.Modules
 {
@@ -203,6 +204,11 @@ namespace Gengar.Modules
 			await ReplyAsync($"Sorry, cakes are only for those who have a birthday").ConfigureAwait(false);
 		}
 
+		[Command("time")]
+		public async Task GetTime()
+		{
+			await ReplyAsync($"Current time is: {DateTimeOffset.Now.ToLocalTime()}").ConfigureAwait(false);
+		}
 		//[Command("shoutout", RunMode = RunMode.Async)]
 		//public async Task Shoutout()
 		//{

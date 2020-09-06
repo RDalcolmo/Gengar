@@ -16,7 +16,7 @@ namespace Gengar.Handlers
 			timer = new Timer(GetSleepTime());
 			timer.Elapsed += (o, e) =>
 			{
-				OnDayChanged(DateTime.Now);
+				OnDayChanged(DateTimeOffset.Now.ToLocalTime());
 				timer.Interval = GetSleepTime();
 			};
 			timer.Start();
@@ -31,12 +31,12 @@ namespace Gengar.Handlers
 
 		private static double GetSleepTime()
 		{
-			var midnightTonight = DateTime.Today.AddDays(1);
-			var differenceInMilliseconds = (midnightTonight - DateTime.Now).TotalMilliseconds + 10000;
+			var midnightTonight = DateTimeOffset.Now.ToLocalTime().AddDays(1);
+			var differenceInMilliseconds = (midnightTonight - DateTimeOffset.Now.ToLocalTime()).TotalMilliseconds + 10000;
 			return differenceInMilliseconds;
 		}
 
-		public static void OnDayChanged(DateTime day)
+		public static void OnDayChanged(DateTimeOffset day)
 		{
 			DayChanged?.Invoke(null, new DayChangedEventArgs(day));
 		}
@@ -46,11 +46,11 @@ namespace Gengar.Handlers
 
 	public class DayChangedEventArgs : EventArgs
 	{
-		public DayChangedEventArgs(DateTime day)
+		public DayChangedEventArgs(DateTimeOffset day)
 		{
 			this.Date = day;
 		}
 
-		public DateTime Date { get; private set; }
+		public DateTimeOffset Date { get; private set; }
 	}
 }
