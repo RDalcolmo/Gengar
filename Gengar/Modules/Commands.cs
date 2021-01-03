@@ -118,6 +118,29 @@ namespace Gengar.Modules
 				}
 			}
 		}
+
+		[Command("remove")]
+		[RequireContext(ContextType.DM)]
+		[RequireOwner]
+		public async Task RemoveUser([Remainder] string UserID)
+		{
+			using (var _dbContext = new GengarContext())
+			{
+				//if (_dbContext.TblBirthdays.AsQueryable().Where(id => id.Userid == Convert.ToInt64(UserID)).Any())
+				var person = await _dbContext.TblBirthdays.FindAsync(Convert.ToInt64(UserID)).ConfigureAwait(false);
+
+				if (person != null)
+				{
+					_dbContext.Remove(person);
+					await ReplyAsync($"Removed user <@{person.Userid}>'s Birthday.").ConfigureAwait(false);
+				}
+				else
+				{
+					await ReplyAsync("This person does not have a birthday registered in our database!").ConfigureAwait(false);
+				}
+				await _dbContext.SaveChangesAsync();
+			}
+		}
 	}
 
 
