@@ -1,11 +1,11 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-ENV TZ=America/New_York
-ENV TIME_ZONE=America/New_York
-
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /app
 
+
+ENV TZ=America/New_York
+ENV TIME_ZONE=America/New_York
 ENV ASPNETCORE_URLS http://*:5002
 EXPOSE 5002
 
