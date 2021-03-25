@@ -230,7 +230,7 @@ namespace Gengar.Modules
 		[Command("time")]
 		public async Task GetTime()
 		{
-			await ReplyAsync($"Current time is: {DateTimeOffset.Now.ToLocalTime()}").ConfigureAwait(false);
+			await ReplyAsync($"Current time is: {DateTime.Now.ToLocalTime()}").ConfigureAwait(false);
 		}
 		//[Command("shoutout", RunMode = RunMode.Async)]
 		//public async Task Shoutout()
