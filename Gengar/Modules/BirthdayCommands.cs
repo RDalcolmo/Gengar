@@ -13,7 +13,7 @@ using Microsoft.VisualBasic;
 namespace Gengar.Modules
 {
 	[Group("bday")]
-	public class Commands : ModuleBase
+	public class BirthdayCommands : ModuleBase
 	{
 		[Command("next", RunMode = RunMode.Async), Summary("Checks if there are any birthdays within 14 days.")]
 		public async Task CheckBirthdays()
