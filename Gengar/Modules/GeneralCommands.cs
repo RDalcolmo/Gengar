@@ -9,10 +9,10 @@ namespace Gengar.Modules
     {
         [RequireOwner]
         [Command("echo", RunMode = RunMode.Async)]
-        public async Task Echo(ulong guildID, ulong channelID, [Remainder]string msg)
+        public async Task Echo(string guildID, string channelID, [Remainder]string msg)
         {
-            var guild = await Context.Client.GetGuildAsync(guildID).ConfigureAwait(false);
-            var channel = await guild.GetTextChannelAsync(channelID).ConfigureAwait(false);
+            var guild = await Context.Client.GetGuildAsync(ulong.Parse(guildID)).ConfigureAwait(false);
+            var channel = await guild.GetTextChannelAsync(ulong.Parse(channelID)).ConfigureAwait(false);
             await channel.SendMessageAsync(msg);
         }
     }
