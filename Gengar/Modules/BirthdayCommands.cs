@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Gengar.Models;
 using Discord.Commands;
-using Gengar.Handlers;
 using Discord;
 using Discord.Addons.Interactive;
 using Microsoft.EntityFrameworkCore;
