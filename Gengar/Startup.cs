@@ -47,6 +47,7 @@ namespace Gengar
 			services.AddSingleton<CommandService>();
 			services.AddSingleton<InteractiveService>();
 			services.AddSingleton<GengarService>();
+			services.AddHostedService<BroadcastService>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
