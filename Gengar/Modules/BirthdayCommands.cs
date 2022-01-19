@@ -12,7 +12,7 @@ using Microsoft.VisualBasic;
 namespace Gengar.Modules
 {
 	[Group("bday")]
-	public class BirthdayCommands : ModuleBase
+	public class BirthdayCommands : ModuleBase<SocketCommandContext>
 	{
 		[Command("next", RunMode = RunMode.Async), Summary("Checks if there are any birthdays within 14 days.")]
 		public async Task CheckBirthdays()
@@ -26,7 +26,7 @@ namespace Gengar.Modules
 					foreach (var user in nextBday.ToList())
 					{
 
-						if (await Context.Guild.GetUserAsync((ulong)user.Userid).ConfigureAwait(false) == null)
+						if (Context.Guild.GetUser((ulong)user.Userid) == null)
 						{
 							nextBday.Remove(user);
 						}
@@ -146,7 +146,7 @@ namespace Gengar.Modules
 	[Group("bcast")]
 	[RequireUserPermission(GuildPermission.ManageGuild)]
 	[RequireContext(ContextType.Guild)]
-	public class RegistrationModule : ModuleBase
+	public class RegistrationModule : ModuleBase<SocketCommandContext>
 	{
 
 		[Command("set"), Summary("Sets a new channel to broadcast birthdays in.")]
@@ -197,7 +197,7 @@ namespace Gengar.Modules
 		}
 	}
 
-	public class HelpModule : ModuleBase
+	public class HelpModule : ModuleBase<SocketCommandContext>
 	{
 		[Command("help")]
 		public async Task Help()
@@ -212,7 +212,7 @@ namespace Gengar.Modules
 		}
 	}
 
-	public class MiscModule : InteractiveBase
+	public class MiscModule : ModuleBase<SocketCommandContext>
 	{
 		[Command("cookie")]
 		public async Task Cookie()
