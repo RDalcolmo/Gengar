@@ -26,7 +26,7 @@ namespace Gengar
 			{
 				// How much logging do you want to see?
 				LogLevel = LogSeverity.Info,
-				GatewayIntents = GatewayIntents.GuildMessages | GatewayIntents.DirectMessages
+				GatewayIntents = GatewayIntents.GuildMessages | GatewayIntents.DirectMessages | GatewayIntents.Guilds
 				//MessageCacheSize = 50,
 			});
 
