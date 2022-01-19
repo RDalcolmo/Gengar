@@ -43,7 +43,7 @@ namespace Gengar.Services
 			};
             Console.WriteLine("Starting action.");
 			// no need to await this call here because this task is scheduled to run much much later.
-			Task.Run(action).Start();
+			Task.Run(action);
 			return Task.CompletedTask;
 		}
 
