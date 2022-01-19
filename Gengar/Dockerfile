@@ -17,7 +17,7 @@ RUN dotnet restore
 COPY . ./
 RUN dotnet publish -c Release -o out
 
-FROM mcr.microsoft.com/dotnet/aspnet:6.0-bullseye-slim
+FROM mcr.microsoft.com/dotnet/aspnet:6.0.101-bullseye-slim
 WORKDIR /app
 COPY --from=build /app/out .
 
