@@ -22,7 +22,7 @@ namespace Gengar.Services
 
 		public Task StartAsync(CancellationToken cancellationToken)
 		{
-            Console.WriteLine("Starting Broadcast service.");
+			Console.WriteLine("Starting Broadcast service.");
 			TimeSpan interval = TimeSpan.FromHours(24);
 			//calculate time to run the first time & delay to set the timer
 			//DateTime.Today gives time of midnight 00.00
@@ -32,7 +32,7 @@ namespace Gengar.Services
 
 			Action action = () =>
 			{
-                Console.WriteLine("Action started.");
+				Console.WriteLine("Action started.");
 				var t1 = Task.Delay(firstInterval);
 				t1.Wait();
 				//Broadcast birthdays
@@ -41,7 +41,7 @@ namespace Gengar.Services
 				// timer repeates call to RemoveScheduledAccounts every 24 hours.
 				_timer = new Timer(BroadcastBirthday, null, TimeSpan.Zero, interval);
 			};
-            Console.WriteLine("Starting action.");
+			Console.WriteLine("Starting action.");
 			// no need to await this call here because this task is scheduled to run much much later.
 			Task.Run(action);
 			return Task.CompletedTask;
@@ -49,7 +49,8 @@ namespace Gengar.Services
 
 		public Task StopAsync(CancellationToken cancellationToken)
 		{
-			throw new NotImplementedException();
+			_timer?.Dispose();
+			return Task.CompletedTask;
 		}
 
 		public List<Tblguilds> GetGuildInformation()
