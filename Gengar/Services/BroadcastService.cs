@@ -80,7 +80,7 @@ namespace Gengar.Services
 						}
 					}
 
-					if (birthday.Count > 0)
+					if (birthday.Any())
 					{
 						string _content;
 						if (birthday.Count == 1)
