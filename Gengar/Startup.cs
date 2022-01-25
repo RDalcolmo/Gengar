@@ -47,18 +47,12 @@ namespace Gengar
 			services.AddSingleton(_client);
 			services.AddSingleton<CommandService>();
 			services.AddSingleton<InteractiveService>();
-			services.AddSingleton<GengarService>();
-			services.AddHostedService<BroadcastService>();
+			services.AddHostedService<GengarService>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
-			Task.Run(async () =>
-			{
-				await app.ApplicationServices.GetRequiredService<GengarService>().InitializeAsync(app.ApplicationServices);
-			});
-
 			app.UseRouting();
 		}
 
