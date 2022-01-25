@@ -49,6 +49,7 @@ namespace Gengar.Services
 
 		public Task StopAsync(CancellationToken cancellationToken)
 		{
+            Console.WriteLine("Disposing timer.");
 			_timer?.Dispose();
 			return Task.CompletedTask;
 		}
@@ -63,6 +64,7 @@ namespace Gengar.Services
 
 		public void BroadcastBirthday(object state)
 		{
+            Console.WriteLine($"Broadcasting today's birthdays: {DateTime.Today.ToLongDateString()}");
 			using (var _dbContext = new GengarContext())
 			{
 				foreach (var guild in GetGuildInformation())
@@ -89,11 +91,11 @@ namespace Gengar.Services
 							_content = $"There are {birthday.Count} birthdays today!";
 
 
-						Channel.SendMessageAsync(_content).Start();
+						Channel.SendMessageAsync(_content).RunSynchronously();
 
 						foreach (var person in birthday)
 						{
-							Channel.SendMessageAsync($"It's <@{person.Userid}> birthday today!! Happy birthday!").Start();
+							Channel.SendMessageAsync($"It's <@{person.Userid}> birthday today!! Happy birthday!").RunSynchronously();
 						}
 					}
 				}
