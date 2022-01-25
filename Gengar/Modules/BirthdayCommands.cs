@@ -42,14 +42,12 @@ namespace Gengar.Modules
 					else
 						_content = $"There are {nextBday.Count} upcoming birthdays!";
 
-					await ReplyAsync(_content).ConfigureAwait(false);
-
-					string message = $"The next person's birthday is:";
+					_content += $"\nThe next person's birthday is:";
 					foreach (var person in nextBday.OrderBy(m => m.Birthday.Month).ThenBy(d => d.Birthday.Day))
 					{
-						message += $"\n<@{person.Userid}> on {person.Birthday.ToString("MMMM dd")}!";
+						_content += $"\n<@{person.Userid}> on {person.Birthday.ToString("MMMM dd")}!";
 					}
-					await ReplyAsync(message).ConfigureAwait(false);
+					await ReplyAsync(_content).ConfigureAwait(false);
 				}
 				else
 				{
@@ -82,14 +80,12 @@ namespace Gengar.Modules
 					else
 						_content = $"There are {nextBday.Count} birthdays in the month of {parsedMonth.ToString("MMMM")}!";
 
-					await ReplyAsync(_content).ConfigureAwait(false);
-
-					string message = $"Birthdays found in this month are:";
+					_content += $"\nBirthdays found in this month are:";
 					foreach (var person in nextBday)
 					{
-						message += $"\n<@{person.Userid}> on {person.Birthday.ToString("MMMM dd")}!";
+						_content += $"\n<@{person.Userid}> on {person.Birthday.ToString("MMMM dd")}!";
 					}
-					await ReplyAsync(message).ConfigureAwait(false);
+					await ReplyAsync(_content).ConfigureAwait(false);
 				}
 				else
 				{

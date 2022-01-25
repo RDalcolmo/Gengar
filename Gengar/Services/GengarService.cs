@@ -106,18 +106,15 @@ namespace Gengar.Services
 						else
 							_content = $"There are {birthday.Count} birthdays today!";
 
+						foreach (var person in birthday)
+						{
+							_content += $"\nIt's <@{person.Userid}> birthday today!! Happy birthday!";
+						}
 						Task.Run(async () =>
 						{
 							await Channel.SendMessageAsync(_content).ConfigureAwait(false);
 						});
-						
-						foreach (var person in birthday)
-						{
-							Task.Run(async () =>
-							{
-								await Channel.SendMessageAsync($"It's <@{person.Userid}> birthday today!! Happy birthday!").ConfigureAwait(false);
-							});
-						}
+
 					}
 				}
 			}
