@@ -16,7 +16,6 @@ namespace Gengar.Models
 		}
 
 		public virtual DbSet<Tblbirthdays> TblBirthdays { get; set; }
-		public virtual DbSet<Tblguilds> TblGuilds { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -39,17 +38,6 @@ namespace Gengar.Models
                 entity.Property(e => e.Comments).HasColumnName("comments");
 
                 entity.Property(e => e.Userid).HasColumnName("userid").IsRequired();
-            });
-
-            modelBuilder.Entity<Tblguilds>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToTable("tblguilds");
-
-                entity.Property(e => e.Channelid).HasColumnName("channelid");
-
-                entity.Property(e => e.Guildid).HasColumnName("guildid");
             });
 
             OnModelCreatingPartial(modelBuilder);

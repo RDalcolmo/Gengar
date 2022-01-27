@@ -66,57 +66,54 @@ namespace Gengar.Services
 			return Task.CompletedTask;
 		}
 
-		public List<Tblguilds> GetGuildInformation()
-		{
-			using (var _dbContext = new GengarContext())
-			{
-				return _dbContext.TblGuilds.ToList();
-			}
-		}
-
 		public void BroadcastBirthday(object state)
 		{
 			Console.WriteLine($"Broadcasting today's birthdays: {DateTime.Today.ToLongDateString()}");
 			using (var _dbContext = new GengarContext())
 			{
-				foreach (var guild in GetGuildInformation())
+				var Guild = _discord.Guilds.FirstOrDefault();
+				
+				if (Guild == null)
+					return;
+
+				Console.WriteLine($"Detected Guild: {Guild.Name}");
+				var Channel = Guild.GetTextChannel(Convert.ToUInt64(Startup.Configuration["DiscordChannel"]));
+
+				if (Channel == null)
+					return;
+				
+				Console.WriteLine($"Detected Broadcast Channel: {Channel.Name}");
+				var birthday = _dbContext.TblBirthdays.AsNoTracking().Where(d => d.Birthday.Month == DateTime.Now.Month && d.Birthday.Day == DateTime.Now.Day).ToList();
+
+				Console.WriteLine($"Total birthdays today: {birthday.Count}");
+
+				foreach (var user in birthday.ToList())
 				{
-					var Guild = _discord.GetGuild((ulong)guild.Guildid);
-					Console.WriteLine($"Detected Guild: {Guild.Name}");
-					var Channel = Guild.GetTextChannel((ulong)guild.Channelid);
-					Console.WriteLine($"Detected Broadcast Channel: {Channel.Name}");
-
-					var birthday = _dbContext.TblBirthdays.AsNoTracking().Where(d => d.Birthday.Month == DateTime.Now.Month && d.Birthday.Day == DateTime.Now.Day).ToList();
-
-					Console.WriteLine($"Total birthdays today: {birthday.Count}");
-
-					foreach (var user in birthday.ToList())
+					if (Guild.GetUser((ulong)user.Userid) == null)
 					{
-						if (Guild.GetUser((ulong)user.Userid) == null)
-						{
-							birthday.Remove(user);
-						}
-					}
-
-					if (birthday.Count > 0)
-					{
-						string _content;
-						if (birthday.Count == 1)
-							_content = "There is 1 birthday today!";
-						else
-							_content = $"There are {birthday.Count} birthdays today!";
-
-						foreach (var person in birthday)
-						{
-							_content += $"\nIt's <@{person.Userid}> birthday today!! Happy birthday!";
-						}
-						Task.Run(async () =>
-						{
-							await Channel.SendMessageAsync(_content).ConfigureAwait(false);
-						});
-
+						birthday.Remove(user);
 					}
 				}
+
+				if (birthday.Count > 0)
+				{
+					string _content;
+					if (birthday.Count == 1)
+						_content = "There is 1 birthday today!";
+					else
+						_content = $"There are {birthday.Count} birthdays today!";
+
+					foreach (var person in birthday)
+					{
+						_content += $"\nIt's <@{person.Userid}> birthday today!! Happy birthday!";
+					}
+					Task.Run(async () =>
+					{
+						await Channel.SendMessageAsync(_content).ConfigureAwait(false);
+					});
+
+				}
+				
 			}
 		}
 

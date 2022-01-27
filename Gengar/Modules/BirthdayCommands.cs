@@ -136,6 +136,55 @@ namespace Gengar.Modules
 				await _dbContext.SaveChangesAsync();
 			}
 		}
+
+		[Command("bcast")]
+		[RequireOwner]
+		public async Task Broadcast()
+		{
+			Console.WriteLine($"Broadcasting today's birthdays: {DateTime.Today.ToLongDateString()}");
+			using (var _dbContext = new GengarContext())
+			{
+				var Guild = Context.Guild;
+
+				if (Guild == null)
+					return;
+
+				Console.WriteLine($"Detected Guild: {Guild.Name}");
+				var Channel = Guild.GetTextChannel(Convert.ToUInt64(Startup.Configuration["DiscordChannel"]));
+
+				if (Channel == null)
+					return;
+
+				Console.WriteLine($"Detected Broadcast Channel: {Channel.Name}");
+				var birthday = _dbContext.TblBirthdays.AsNoTracking().Where(d => d.Birthday.Month == DateTime.Now.Month && d.Birthday.Day == DateTime.Now.Day).ToList();
+
+				Console.WriteLine($"Total birthdays today: {birthday.Count}");
+
+				foreach (var user in birthday.ToList())
+				{
+					if (Guild.GetUser((ulong)user.Userid) == null)
+					{
+						birthday.Remove(user);
+					}
+				}
+
+				if (birthday.Count > 0)
+				{
+					string _content;
+					if (birthday.Count == 1)
+						_content = "There is 1 birthday today!";
+					else
+						_content = $"There are {birthday.Count} birthdays today!";
+
+					foreach (var person in birthday)
+					{
+						_content += $"\nIt's <@{person.Userid}> birthday today!! Happy birthday!";
+					}
+
+					await Channel.SendMessageAsync(_content).ConfigureAwait(false);
+				}
+			}
+		}
 	}
 
 
@@ -148,48 +197,22 @@ namespace Gengar.Modules
 		[Command("set"), Summary("Sets a new channel to broadcast birthdays in.")]
 		public async Task SetToChannel()
 		{
-
-			using (var _dbContext = new GengarContext())
+			if (Convert.ToUInt64(Startup.Configuration["DicordChannel"]) != Context.Channel.Id)
 			{
-				var guild = await _dbContext.TblGuilds.AsAsyncEnumerable().FirstOrDefaultAsync(g => g.Guildid == (long)Context.Guild.Id).ConfigureAwait(false);
-
-				if (guild == null)
-				{
-					_dbContext.Add(new Tblguilds() { Guildid = (long)Context.Guild.Id, Channelid = (long)Context.Channel.Id });
-					await ReplyAsync("Birthday messages will now be broadcasted to this channel.").ConfigureAwait(false);
-				}
-				else if (guild.Channelid != (long)Context.Channel.Id)
-				{
-					guild.Channelid = (long)Context.Channel.Id;
-					await ReplyAsync("Broadcasting channel has been changed. Birthday messages will now be posted here.").ConfigureAwait(false);
-				}
-				else
-				{
-					await ReplyAsync("Messages are already being posted in the current channel.").ConfigureAwait(false);
-				}
-
-				await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+				Startup.Configuration["DicordChannel"] = Context.Channel.Id.ToString();
+				await ReplyAsync("Broadcasting channel has been changed. Birthday messages will now be posted here.").ConfigureAwait(false);
+			}
+			else
+			{
+				await ReplyAsync("Messages are already being posted in the current channel.").ConfigureAwait(false);
 			}
 		}
 
 		[Command("remove"), Summary("Stops broadcasting birthdays to the server.")]
 		public async Task RemoveFromChannel()
 		{
-			using (var _dbContext = new GengarContext())
-			{
-				var guild = await _dbContext.TblGuilds.AsAsyncEnumerable().FirstOrDefaultAsync(g => g.Guildid == (long)Context.Guild.Id).ConfigureAwait(false);
-
-				if (guild != null)
-				{
-					_dbContext.Remove(guild);
-					await _dbContext.SaveChangesAsync().ConfigureAwait(false);
-					await ReplyAsync("The current broadcasting channel has been removed.").ConfigureAwait(false);
-				}
-				else
-				{
-					await ReplyAsync("This discord guild does not have a channel listed for broadcasting.").ConfigureAwait(false);
-				}
-			}
+			Startup.Configuration["DiscordChannel"] = "";
+			await ReplyAsync("The current broadcasting channel has been removed.").ConfigureAwait(false);
 		}
 	}
 
