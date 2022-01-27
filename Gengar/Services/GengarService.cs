@@ -89,7 +89,9 @@ namespace Gengar.Services
 
 				foreach (var user in birthday.ToList())
 				{
-					if (Guild.GetUser((ulong)user.Userid) == null)
+					var userInGuild = Guild.GetUser((ulong)user.Userid);
+
+					if (userInGuild == null)
 					{
 						birthday.Remove(user);
 					}
