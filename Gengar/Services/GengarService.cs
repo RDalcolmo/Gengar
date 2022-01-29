@@ -40,7 +40,7 @@ namespace Gengar.Services
 			TimeSpan interval = TimeSpan.FromHours(24);
 			//calculate time to run the first time & delay to set the timer
 			//DateTime.Today gives time of midnight 00.00
-			var nextRunTime = DateTime.Today.AddDays(1).AddHours(10);
+			var nextRunTime = DateTime.Today.AddDays(1).AddHours(Convert.ToDouble(Startup.Configuration["BroadcastTime"]));
 			var curTime = DateTime.Now;
 			var firstInterval = nextRunTime.Subtract(curTime);
 
