@@ -17,44 +17,42 @@ namespace Gengar.Modules
 		[Command("next", RunMode = RunMode.Async), Summary("Checks if there are any birthdays within 14 days.")]
 		public async Task CheckBirthdays()
 		{
-			using (var _dbContext = new GengarContext())
-			{
-				var nextBday = await _dbContext.TblBirthdays.FromSqlRaw("select userid, birthday, comments from tblbirthdays where to_char(birthday,'ddd')::int-to_char(now(),'DDD')::int between 0 and 15;").ToListAsync().ConfigureAwait(false);
-				
-				if (Context.Guild != null)
-				{
-					foreach (var user in nextBday.ToList())
-					{
+            using var _dbContext = new GengarContext();
+            var nextBday = await _dbContext.TblBirthdays.FromSqlRaw("select userid, birthday, comments from tblbirthdays where to_char(birthday,'ddd')::int-to_char(now(),'DDD')::int between 0 and 15;").ToListAsync().ConfigureAwait(false);
 
-						if (Context.Guild.GetUser((ulong)user.Userid) == null)
-						{
-							nextBday.Remove(user);
-						}
+            if (Context.Guild != null)
+            {
+                foreach (var user in nextBday.ToList())
+                {
 
-					}
-				}
+                    if (Context.Guild.GetUser((ulong)user.Userid) == null)
+                    {
+                        nextBday.Remove(user);
+                    }
 
-				if (nextBday.Count > 0)
-				{
-					string _content;
-					if (nextBday.Count == 1)
-						_content = "There is 1 upcoming birthday!";
-					else
-						_content = $"There are {nextBday.Count} upcoming birthdays!";
+                }
+            }
 
-					_content += $"\nThe next person's birthday is:";
-					foreach (var person in nextBday.OrderBy(m => m.Birthday.Month).ThenBy(d => d.Birthday.Day))
-					{
-						_content += $"\n<@{person.Userid}> on {person.Birthday.ToString("MMMM dd")}!";
-					}
-					await ReplyAsync(_content).ConfigureAwait(false);
-				}
-				else
-				{
-					await ReplyAsync("There are no birthdays in the next 14 days!").ConfigureAwait(false);
-				}
-			}
-		}
+            if (nextBday.Count > 0)
+            {
+                string _content;
+                if (nextBday.Count == 1)
+                    _content = "There is 1 upcoming birthday!";
+                else
+                    _content = $"There are {nextBday.Count} upcoming birthdays!";
+
+                _content += $"\nThe next person's birthday is:";
+                foreach (var person in nextBday.OrderBy(m => m.Birthday.Month).ThenBy(d => d.Birthday.Day))
+                {
+                    _content += $"\n<@{person.Userid}> on {person.Birthday:MMMM dd}!";
+                }
+                await ReplyAsync(_content).ConfigureAwait(false);
+            }
+            else
+            {
+                await ReplyAsync("There are no birthdays in the next 14 days!").ConfigureAwait(false);
+            }
+        }
 
 		[Command("month")]
 		[Alias("m")]
@@ -63,130 +61,121 @@ namespace Gengar.Modules
 		{
 
 			string[] formats = { "M", "MM", "MMM", "MMMM" };
-			DateTime parsedMonth;
-			if (month.Length == 1)
-				month = "0" + month;
-			DateTime.TryParseExact(month, formats, new CultureInfo("en-US"), DateTimeStyles.None, out parsedMonth);
-			using (var _dbContext = new GengarContext())
-			{
-				//var nextBday = db.TblBirthdays.Where(id => id.Birthday.Value.Month == parsedMonth.Month).OrderBy(bday => bday.Birthday.Value.Day).ToList();
-				var nextBday = await _dbContext.TblBirthdays.FromSqlRaw($"SELECT userid, birthday, comments FROM tblbirthdays WHERE EXTRACT(MONTH FROM birthday) = {parsedMonth.Month} ORDER BY birthday").ToListAsync().ConfigureAwait(false);
+            if (month.Length == 1)
+                month = "0" + month;
+            DateTime.TryParseExact(month, formats, new CultureInfo("en-US"), DateTimeStyles.None, out DateTime parsedMonth);
+            using var _dbContext = new GengarContext();
+            //var nextBday = db.TblBirthdays.Where(id => id.Birthday.Value.Month == parsedMonth.Month).OrderBy(bday => bday.Birthday.Value.Day).ToList();
+            var nextBday = await _dbContext.TblBirthdays.FromSqlRaw($"SELECT userid, birthday, comments FROM tblbirthdays WHERE EXTRACT(MONTH FROM birthday) = {parsedMonth.Month} ORDER BY birthday").ToListAsync().ConfigureAwait(false);
 
-				if (nextBday.Count > 0)
-				{
-					string _content;
-					if (nextBday.Count == 1)
-						_content = $"There is 1 birthday in the month of {parsedMonth.ToString("MMMM")}!";
-					else
-						_content = $"There are {nextBday.Count} birthdays in the month of {parsedMonth.ToString("MMMM")}!";
+            if (nextBday.Count > 0)
+            {
+                string _content;
+                if (nextBday.Count == 1)
+                    _content = $"There is 1 birthday in the month of {parsedMonth:MMMM}!";
+                else
+                    _content = $"There are {nextBday.Count} birthdays in the month of {parsedMonth:MMMM}!";
 
-					_content += $"\nBirthdays found in this month are:";
-					foreach (var person in nextBday)
-					{
-						_content += $"\n<@{person.Userid}> on {person.Birthday.ToString("MMMM dd")}!";
-					}
-					await ReplyAsync(_content).ConfigureAwait(false);
-				}
-				else
-				{
-					await ReplyAsync("There are no birthdays in this month!").ConfigureAwait(false);
-				}
-			}
-		}
+                _content += $"\nBirthdays found in this month are:";
+                foreach (var person in nextBday)
+                {
+                    _content += $"\n<@{person.Userid}> on {person.Birthday:MMMM dd}!";
+                }
+                await ReplyAsync(_content).ConfigureAwait(false);
+            }
+            else
+            {
+                await ReplyAsync("There are no birthdays in this month!").ConfigureAwait(false);
+            }
+        }
 
 		[Command("when")]
 		[RequireContext(ContextType.DM)]
 		public async Task WhenIsBirthday([Remainder] string UserID)
 		{
-			using (var _dbContext = new GengarContext())
-			{
-				//if (_dbContext.TblBirthdays.AsQueryable().Where(id => id.Userid == Convert.ToInt64(UserID)).Any())
-				var person = await _dbContext.TblBirthdays.FindAsync(Convert.ToInt64(UserID)).ConfigureAwait(false);
+            using var _dbContext = new GengarContext();
+            //if (_dbContext.TblBirthdays.AsQueryable().Where(id => id.Userid == Convert.ToInt64(UserID)).Any())
+            var person = await _dbContext.TblBirthdays.FindAsync(Convert.ToInt64(UserID)).ConfigureAwait(false);
 
-				if (person != null)
-				{
-					await ReplyAsync($"<@{person.Userid}>'s Birthday is on {person.Birthday.ToString("MMMM dd")}").ConfigureAwait(false);
-				}
-				else
-				{
-					await ReplyAsync("This person does not have a birthday registered in our database!").ConfigureAwait(false);
-				}
-			}
-		}
+            if (person != null)
+            {
+                await ReplyAsync($"<@{person.Userid}>'s Birthday is on {person.Birthday:MMMM dd}").ConfigureAwait(false);
+            }
+            else
+            {
+                await ReplyAsync("This person does not have a birthday registered in our database!").ConfigureAwait(false);
+            }
+        }
 
 		[Command("remove")]
 		[RequireContext(ContextType.DM)]
 		[RequireOwner]
 		public async Task RemoveUser([Remainder] string UserID)
 		{
-			using (var _dbContext = new GengarContext())
-			{
-				//if (_dbContext.TblBirthdays.AsQueryable().Where(id => id.Userid == Convert.ToInt64(UserID)).Any())
-				var person = await _dbContext.TblBirthdays.FindAsync(Convert.ToInt64(UserID)).ConfigureAwait(false);
+            using var _dbContext = new GengarContext();
+            //if (_dbContext.TblBirthdays.AsQueryable().Where(id => id.Userid == Convert.ToInt64(UserID)).Any())
+            var person = await _dbContext.TblBirthdays.FindAsync(Convert.ToInt64(UserID)).ConfigureAwait(false);
 
-				if (person != null)
-				{
-					_dbContext.Remove(person);
-					await ReplyAsync($"Removed user <@{person.Userid}>'s Birthday.").ConfigureAwait(false);
-				}
-				else
-				{
-					await ReplyAsync("This person does not have a birthday registered in our database!").ConfigureAwait(false);
-				}
-				await _dbContext.SaveChangesAsync();
-			}
-		}
+            if (person != null)
+            {
+                _dbContext.Remove(person);
+                await ReplyAsync($"Removed user <@{person.Userid}>'s Birthday.").ConfigureAwait(false);
+            }
+            else
+            {
+                await ReplyAsync("This person does not have a birthday registered in our database!").ConfigureAwait(false);
+            }
+            await _dbContext.SaveChangesAsync();
+        }
 
 		[Command("bcast")]
 		[RequireOwner]
 		public async Task Broadcast()
 		{
 			Console.WriteLine($"Broadcasting today's birthdays: {DateTime.Today.ToLongDateString()}");
-			using (var _dbContext = new GengarContext())
-			{
-				var Guild = Context.Guild;
+            using var _dbContext = new GengarContext();
+            var Guild = Context.Guild;
 
-				if (Guild == null)
-					return;
+            if (Guild == null)
+                return;
 
-				Console.WriteLine($"Detected Guild: {Guild.Name}");
-				var Channel = Guild.GetTextChannel(Convert.ToUInt64(Startup.Configuration["DiscordChannel"]));
+            Console.WriteLine($"Detected Guild: {Guild.Name}");
+            var Channel = Guild.GetTextChannel(Convert.ToUInt64(Startup.Configuration["DiscordChannel"]));
 
-				if (Channel == null)
-					return;
+            if (Channel == null)
+                return;
 
-				Console.WriteLine($"Detected Broadcast Channel: {Channel.Name}");
-				var birthday = _dbContext.TblBirthdays.AsNoTracking().Where(d => d.Birthday.Month == DateTime.Now.Month && d.Birthday.Day == DateTime.Now.Day).ToList();
+            Console.WriteLine($"Detected Broadcast Channel: {Channel.Name}");
+            var birthday = _dbContext.TblBirthdays.AsNoTracking().Where(d => d.Birthday.Month == DateTime.Now.Month && d.Birthday.Day == DateTime.Now.Day).ToList();
 
-				Console.WriteLine($"Total birthdays today: {birthday.Count}");
+            Console.WriteLine($"Total birthdays today: {birthday.Count}");
 
-				foreach (var user in birthday.ToList())
-				{
-					var userInGuild = Guild.GetUser((ulong)user.Userid);
+            foreach (var user in birthday.ToList())
+            {
+                var userInGuild = Guild.GetUser((ulong)user.Userid);
 
-					if (userInGuild == null)
-					{
-						birthday.Remove(user);
-					}
-				}
+                if (userInGuild == null)
+                {
+                    birthday.Remove(user);
+                }
+            }
 
-				if (birthday.Count > 0)
-				{
-					string _content;
-					if (birthday.Count == 1)
-						_content = "There is 1 birthday today!";
-					else
-						_content = $"There are {birthday.Count} birthdays today!";
+            if (birthday.Count > 0)
+            {
+                string _content;
+                if (birthday.Count == 1)
+                    _content = "There is 1 birthday today!";
+                else
+                    _content = $"There are {birthday.Count} birthdays today!";
 
-					foreach (var person in birthday)
-					{
-						_content += $"\nIt's <@{person.Userid}> birthday today!! Happy birthday!";
-					}
+                foreach (var person in birthday)
+                {
+                    _content += $"\nIt's <@{person.Userid}> birthday today!! Happy birthday!";
+                }
 
-					await Channel.SendMessageAsync(_content).ConfigureAwait(false);
-				}
-			}
-		}
+                await Channel.SendMessageAsync(_content).ConfigureAwait(false);
+            }
+        }
 	}
 
 

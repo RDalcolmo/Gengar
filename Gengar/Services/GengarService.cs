@@ -17,7 +17,7 @@ namespace Gengar.Services
 		private static Timer _timer;
 		private readonly DiscordSocketClient _discord;
 		private readonly CommandService _commands;
-		private IServiceProvider _provider;
+		private readonly IServiceProvider _provider;
 
 		public GengarService(IServiceProvider provider, DiscordSocketClient discord, CommandService commands)
 		{
@@ -33,7 +33,7 @@ namespace Gengar.Services
 			Task.Run(async () =>
 			{
 				await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _provider).ConfigureAwait(false);
-			});
+			}, cancellationToken);
 			
             Console.WriteLine("Command module added successfully.");
 
@@ -44,18 +44,18 @@ namespace Gengar.Services
 			var curTime = DateTime.Now;
 			var firstInterval = nextRunTime.Subtract(curTime);
 
-			Action action = () =>
-			{
-				Console.WriteLine("Action started.");
-				var t1 = Task.Delay(firstInterval);
-				t1.Wait();
-				// Schedule it to be called every 24 hours
-				// timer repeates call to RemoveScheduledAccounts every 24 hours.
-				_timer = new Timer(BroadcastBirthday, null, TimeSpan.Zero, interval);
-			};
-			Console.WriteLine("Starting action.");
+            void action()
+            {
+                Console.WriteLine("Action started.");
+                var t1 = Task.Delay(firstInterval, cancellationToken);
+                t1.Wait(cancellationToken);
+                // Schedule it to be called every 24 hours
+                // timer repeates call to RemoveScheduledAccounts every 24 hours.
+                _timer = new Timer(BroadcastBirthday, null, TimeSpan.Zero, interval);
+            }
+            Console.WriteLine("Starting action.");
 			// no need to await this call here because this task is scheduled to run much much later.
-			Task.Run(action);
+			Task.Run(action, cancellationToken);
 			return Task.CompletedTask;
 		}
 
@@ -69,61 +69,57 @@ namespace Gengar.Services
 		public void BroadcastBirthday(object state)
 		{
 			Console.WriteLine($"Broadcasting today's birthdays: {DateTime.Today.ToLongDateString()}");
-			using (var _dbContext = new GengarContext())
-			{
-				var Guild = _discord.Guilds.FirstOrDefault();
-				
-				if (Guild == null)
-					return;
+            using var _dbContext = new GengarContext();
+            var Guild = _discord.Guilds.FirstOrDefault();
 
-				Console.WriteLine($"Detected Guild: {Guild.Name}");
-				var Channel = Guild.GetTextChannel(Convert.ToUInt64(Startup.Configuration["DiscordChannel"]));
+            if (Guild == null)
+                return;
 
-				if (Channel == null)
-					return;
-				
-				Console.WriteLine($"Detected Broadcast Channel: {Channel.Name}");
-				var birthday = _dbContext.TblBirthdays.AsNoTracking().Where(d => d.Birthday.Month == DateTime.Now.Month && d.Birthday.Day == DateTime.Now.Day).ToList();
+            Console.WriteLine($"Detected Guild: {Guild.Name}");
+            var Channel = Guild.GetTextChannel(Convert.ToUInt64(Startup.Configuration["DiscordChannel"]));
 
-				Console.WriteLine($"Total birthdays today: {birthday.Count}");
+            if (Channel == null)
+                return;
 
-				foreach (var user in birthday.ToList())
-				{
-					var userInGuild = Guild.GetUser((ulong)user.Userid);
+            Console.WriteLine($"Detected Broadcast Channel: {Channel.Name}");
+            var birthday = _dbContext.TblBirthdays.AsNoTracking().Where(d => d.Birthday.Month == DateTime.Now.Month && d.Birthday.Day == DateTime.Now.Day).ToList();
 
-					if (userInGuild == null)
-					{
-						birthday.Remove(user);
-					}
-				}
+            Console.WriteLine($"Total birthdays today: {birthday.Count}");
 
-				if (birthday.Count > 0)
-				{
-					string _content;
-					if (birthday.Count == 1)
-						_content = "There is 1 birthday today!";
-					else
-						_content = $"There are {birthday.Count} birthdays today!";
+            foreach (var user in birthday.ToList())
+            {
+                var userInGuild = Guild.GetUser((ulong)user.Userid);
 
-					foreach (var person in birthday)
-					{
-						_content += $"\nIt's <@{person.Userid}> birthday today!! Happy birthday!";
-					}
-					Task.Run(async () =>
-					{
-						await Channel.SendMessageAsync(_content).ConfigureAwait(false);
-					});
+                if (userInGuild == null)
+                {
+                    birthday.Remove(user);
+                }
+            }
 
-				}
-				
-			}
-		}
+            if (birthday.Count > 0)
+            {
+                string _content;
+                if (birthday.Count == 1)
+                    _content = "There is 1 birthday today!";
+                else
+                    _content = $"There are {birthday.Count} birthdays today!";
+
+                foreach (var person in birthday)
+                {
+                    _content += $"\nIt's <@{person.Userid}> birthday today!! Happy birthday!";
+                }
+                Task.Run(async () =>
+                {
+                    await Channel.SendMessageAsync(_content).ConfigureAwait(false);
+                });
+
+            }
+        }
 
 		private async Task HandleCommandAsync(SocketMessage messageParam)
         {
             // Don't process the command if it was a system message
-            var message = messageParam as SocketUserMessage;
-            if (message == null) return;
+            if (messageParam is not SocketUserMessage message) return;
 
             // Create a number to track where the prefix ends and the command begins
             int argPos = 0;
