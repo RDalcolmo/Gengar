@@ -3,9 +3,6 @@
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /app
 
-
-ENV TZ=America/New_York
-ENV TIME_ZONE=America/New_York
 ENV ASPNETCORE_URLS http://*:5002
 EXPOSE 5002
 
