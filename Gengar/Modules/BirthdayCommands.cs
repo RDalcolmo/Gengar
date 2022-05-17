@@ -77,7 +77,7 @@ namespace Gengar.Modules
                     _content = $"There are {nextBday.Count} birthdays in the month of {parsedMonth:MMMM}!";
 
                 _content += $"\nBirthdays found in this month are:";
-                foreach (var person in nextBday)
+                foreach (var person in nextBday.OrderBy(m => m.Birthday.Month).ThenBy(d => d.Birthday.Day))
                 {
                     _content += $"\n<@{person.Userid}> on {person.Birthday:MMMM dd}!";
                 }
