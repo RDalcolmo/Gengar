@@ -15,4 +15,4 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker image
-      run: docker build . --file Gengar/Dockerfile --tag rafael3100/gengar:latest
+      run: docker build . --file Gengar/Dockerfile --tag skyeraf/gengar:latest
