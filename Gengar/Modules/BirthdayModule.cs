@@ -118,6 +118,37 @@ namespace Gengar.Modules
             await RespondAsync(_content, ephemeral: true);
         }
 
+        [SlashCommand("add", "Adds a birthday to the database")]
+        [RequireOwner]
+        public async Task AddUser([Summary(description: "Discord user ID")] IUser userid,
+                                  [Summary(description: "Birthday month")] Month month,
+                                  [Summary(description: "Birthday day of the month")] int day)
+        {
+            var person = await _dbContext.TblBirthdays.FindAsync(userid.Id);
+
+            string _content;
+
+            if (person == null)
+            {
+                await _dbContext.TblBirthdays.AddAsync(new Tblbirthdays()
+                {
+                    Userid = userid.Id,
+                    Birthday = new DateTime(1990, (int)month, day),
+                    Comments = userid.Username
+                });
+                if (await _dbContext.SaveChangesAsync() > 0)
+                    _content = $"Added {userid.Mention} to the database on {month} {day}.";
+                else
+                    _content = $"Error on the database trying to add user.";
+            }
+            else
+            {
+                _content = $"User: <@{person.Userid}> is already in the database.";
+            }
+
+            await RespondAsync(_content, ephemeral: true);
+        }
+
         [SlashCommand("bcast", "Broadcasts the birthday messages to the channel set")]
         [RequireOwner]
         public async Task Broadcast()
