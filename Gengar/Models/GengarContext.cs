@@ -6,24 +6,12 @@ namespace Gengar.Models
 {
 	public partial class GengarContext : DbContext
 	{
-		public GengarContext()
-		{
-		}
-
 		public GengarContext(DbContextOptions<GengarContext> options)
 			: base(options)
 		{
 		}
 
 		public virtual DbSet<Tblbirthdays> TblBirthdays { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseNpgsql(Startup.Configuration["ConnectionString"]);
-            }
-        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
