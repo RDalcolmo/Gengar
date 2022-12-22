@@ -151,6 +151,7 @@ namespace Gengar.Modules
 
         [SlashCommand("bcast", "Broadcasts the birthday messages to the channel set")]
         [RequireOwner]
+        [RequireContext(ContextType.Guild)]
         public async Task Broadcast()
         {
             Console.WriteLine($"Broadcasting today's birthdays: {DateTime.Today.ToLongDateString()}");
