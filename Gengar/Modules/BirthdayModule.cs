@@ -179,7 +179,7 @@ namespace Gengar.Modules
             _dbContext = dbContext;
         }
 
-        [SlashCommand("set", "Sets a new channel to broadcast birthdays in.")]
+        [SlashCommand("set", "Sets a new channel to broadcast birthdays in")]
         public async Task SetToChannel()
         {
             string _content;
@@ -190,13 +190,13 @@ namespace Gengar.Modules
             }
             else
             {
-                _content = "Messages are already being posted in the current channel.";
+                _content = "Messages are already being posted in the current channel";
             }
 
             await RespondAsync(_content, ephemeral: true);
         }
 
-        [SlashCommand("remove", "Stops broadcasting birthdays to the server.")]
+        [SlashCommand("remove", "Stops broadcasting birthdays to the server")]
         public async Task RemoveFromChannel()
         {
             _configuration["DiscordChannel"] = "";
