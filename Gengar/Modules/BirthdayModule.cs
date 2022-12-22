@@ -142,7 +142,7 @@ namespace Gengar.Modules
 
             foreach (var user in birthday.ToList())
             {
-                var userInGuild = Guild.GetUser((ulong)user.Userid);
+                var userInGuild = Guild.GetUser(user.Userid);
 
                 if (userInGuild == null)
                 {
