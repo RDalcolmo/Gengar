@@ -29,7 +29,7 @@ namespace Gengar.Modules
                 foreach (var user in nextBday.ToList())
                 {
 
-                    if (Context.Guild.GetUser((ulong)user.Userid) == null)
+                    if (Context.Guild.GetUser(user.Userid) == null)
                     {
                         nextBday.Remove(user);
                     }
@@ -173,13 +173,11 @@ namespace Gengar.Modules
     [RequireContext(ContextType.Guild)]
     public class RegistrationModule : InteractionModuleBase<SocketInteractionContext>
     {
-        private readonly GengarContext _dbContext;
         private readonly IConfiguration _configuration;
 
-        public RegistrationModule(GengarContext dbContext, IConfiguration configuration)
+        public RegistrationModule(IConfiguration configuration)
         {
             _configuration = configuration;
-            _dbContext = dbContext;
         }
 
         [SlashCommand("set", "Sets a new channel to broadcast birthdays in")]
