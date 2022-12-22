@@ -85,7 +85,7 @@ namespace Gengar.Modules
         }
 
         [SlashCommand("when", "Gets the birthday date of the given discord user ID")]
-        public async Task WhenIsBirthday([Summary(description: "Discord user ID")] long UserID)
+        public async Task WhenIsBirthday([Summary(description: "Discord user ID")] ulong UserID)
         {
             var person = await _dbContext.TblBirthdays.AsNoTracking().Where(u => u.Userid == UserID).FirstOrDefaultAsync();
             string _content;
@@ -100,7 +100,7 @@ namespace Gengar.Modules
 
         [SlashCommand("remove", "Removes a birthday from the database")]
         [RequireOwner]
-        public async Task RemoveUser([Summary(description: "Discord user ID")] long UserID)
+        public async Task RemoveUser([Summary(description: "Discord user ID")] ulong UserID)
         {
             var person = await _dbContext.TblBirthdays.FindAsync(UserID);
 
@@ -153,8 +153,11 @@ namespace Gengar.Modules
             var numberOfBirthdays = birthday.Count;
 
             if (numberOfBirthdays == 0)
+            {
+                await RespondAsync("There are no birthdays today", ephemeral: true);
                 return;
-
+            }
+                
             string _content = $"There {(numberOfBirthdays > 1 ? $"are {numberOfBirthdays} birthdays" : "is 1 birthday")} today!";
             foreach (var person in birthday)
             {
