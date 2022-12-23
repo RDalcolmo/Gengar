@@ -11,7 +11,7 @@ namespace Gengar
 {
     public class Program
     {
-        private readonly IConfiguration _configuration;
+        internal static IConfiguration _configuration;
         private readonly IServiceProvider _services;
 
         private readonly DiscordSocketConfig _socketConfig = new()
@@ -32,7 +32,6 @@ namespace Gengar
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
                 .AddSingleton<InteractionHandler>()
-                .AddDbContext<GengarContext>(options => options.UseNpgsql(_configuration["ConnectionString"]))
                 .BuildServiceProvider();
         }
 

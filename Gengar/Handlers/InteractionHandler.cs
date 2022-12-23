@@ -22,15 +22,13 @@ namespace Gengar.Handlers
         private readonly InteractionService _handler;
         private readonly IServiceProvider _services;
         private readonly IConfiguration _configuration;
-        private readonly GengarContext _dbContext;
 
-        public InteractionHandler(DiscordSocketClient client, InteractionService handler, IServiceProvider services, IConfiguration configuration, GengarContext dbContext)
+        public InteractionHandler(DiscordSocketClient client, InteractionService handler, IServiceProvider services, IConfiguration configuration)
         {
             _client = client;
             _handler = handler;
             _services = services;
             _configuration = configuration;
-            _dbContext = dbContext;
         }
 
         public async Task InitializeAsync()
@@ -90,6 +88,7 @@ namespace Gengar.Handlers
 
             if (Channel == null)
                 return;
+            using var _dbContext = new GengarContext();
 
             Console.WriteLine($"Detected Broadcast Channel: {Channel.Name}");
             var birthday = await _dbContext.TblBirthdays.AsNoTracking().Where(d => d.Birthday.Month == DateTime.Now.Month && d.Birthday.Day == DateTime.Now.Day).ToListAsync();

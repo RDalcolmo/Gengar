@@ -10,18 +10,18 @@ namespace Gengar.Modules
     [Group("bday", "Birthday commands")]
     public class BirthdayModule : InteractionModuleBase<SocketInteractionContext>
     {
-        private readonly GengarContext _dbContext;
         private readonly IConfiguration _configuration;
 
-        public BirthdayModule(GengarContext dbContext, IConfiguration configuration)
+        public BirthdayModule(IConfiguration configuration)
         {
             _configuration = configuration;
-            _dbContext = dbContext;
         }
 
         [SlashCommand("next", "Checks if there are any birthdays within 14 days")]
         public async Task CheckBirthdays()
         {
+            using var _dbContext = new GengarContext();
+
             var nextBday = await _dbContext.TblBirthdays.FromSqlRaw("select userid, birthday, comments from tblbirthdays where to_char(birthday,'ddd')::int-to_char(now(),'DDD')::int between 0 and 15;").AsNoTracking().ToListAsync();
 
             if (Context.Guild != null)
@@ -102,6 +102,8 @@ namespace Gengar.Modules
         [RequireOwner]
         public async Task RemoveUser([Summary(description: "Discord user ID")] IUser userid)
         {
+            using var _dbContext = new GengarContext();
+
             var person = await _dbContext.TblBirthdays.FindAsync(userid.Id);
 
             string _content;
@@ -124,6 +126,8 @@ namespace Gengar.Modules
                                   [Summary(description: "Birthday month")] Month month,
                                   [Summary(description: "Birthday day of the month")] int day)
         {
+            using var _dbContext = new GengarContext();
+
             var person = await _dbContext.TblBirthdays.FindAsync(userid.Id);
 
             string _content;
@@ -168,6 +172,9 @@ namespace Gengar.Modules
                 return;
 
             Console.WriteLine($"Detected Broadcast Channel: {Channel.Name}");
+
+            using var _dbContext = new GengarContext();
+
             var birthday = await _dbContext.TblBirthdays.AsNoTracking().Where(d => d.Birthday.Month == DateTime.Now.Month && d.Birthday.Day == DateTime.Now.Day).ToListAsync();
 
             Console.WriteLine($"Total birthdays today: {birthday.Count}");
