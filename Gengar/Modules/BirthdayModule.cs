@@ -60,6 +60,8 @@ namespace Gengar.Modules
         [SlashCommand("month", "Gets a list of all birthdays in the chosen month")]
         public async Task BirthdayInMonth([Summary(description: "Choose the month")] Month month)
         {
+            using var _dbContext = new GengarContext();
+
             var nextBday = await _dbContext.TblBirthdays.AsNoTracking().Where(id => id.Birthday.Month == (int)month).OrderBy(bday => bday.Birthday.Day).ToListAsync();
 
             var numberOfBirthdays = nextBday.Count;
@@ -87,6 +89,8 @@ namespace Gengar.Modules
         [SlashCommand("when", "Gets the birthday date of the given discord user ID")]
         public async Task WhenIsBirthday([Summary(description: "Discord user ID")] IUser userid)
         {
+            using var _dbContext = new GengarContext();
+
             var person = await _dbContext.TblBirthdays.AsNoTracking().Where(u => u.Userid == userid.Id).FirstOrDefaultAsync();
             string _content;
            
