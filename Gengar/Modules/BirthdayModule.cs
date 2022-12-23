@@ -22,7 +22,7 @@ namespace Gengar.Modules
         [SlashCommand("next", "Checks if there are any birthdays within 14 days")]
         public async Task CheckBirthdays()
         {
-            var nextBday = _dbContext.TblBirthdays.FromSqlRaw("select userid, birthday, comments from tblbirthdays where to_char(birthday,'ddd')::int-to_char(now(),'DDD')::int between 0 and 15;").AsNoTracking().ToList();
+            var nextBday = await _dbContext.TblBirthdays.FromSqlRaw("select userid, birthday, comments from tblbirthdays where to_char(birthday,'ddd')::int-to_char(now(),'DDD')::int between 0 and 15;").AsNoTracking().ToListAsync();
 
             if (Context.Guild != null)
             {
@@ -60,7 +60,7 @@ namespace Gengar.Modules
         [SlashCommand("month", "Gets a list of all birthdays in the chosen month")]
         public async Task BirthdayInMonth([Summary(description: "Choose the month")] Month month)
         {
-            var nextBday = _dbContext.TblBirthdays.AsNoTracking().Where(id => id.Birthday.Month == (int)month).OrderBy(bday => bday.Birthday.Day).ToList();
+            var nextBday = await _dbContext.TblBirthdays.AsNoTracking().Where(id => id.Birthday.Month == (int)month).OrderBy(bday => bday.Birthday.Day).ToListAsync();
 
             var numberOfBirthdays = nextBday.Count;
 
@@ -168,7 +168,7 @@ namespace Gengar.Modules
                 return;
 
             Console.WriteLine($"Detected Broadcast Channel: {Channel.Name}");
-            var birthday = _dbContext.TblBirthdays.AsNoTracking().Where(d => d.Birthday.Month == DateTime.Now.Month && d.Birthday.Day == DateTime.Now.Day).ToList();
+            var birthday = await _dbContext.TblBirthdays.AsNoTracking().Where(d => d.Birthday.Month == DateTime.Now.Month && d.Birthday.Day == DateTime.Now.Day).ToListAsync();
 
             Console.WriteLine($"Total birthdays today: {birthday.Count}");
 

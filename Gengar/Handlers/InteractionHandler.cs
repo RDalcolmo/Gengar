@@ -92,7 +92,7 @@ namespace Gengar.Handlers
                 return;
 
             Console.WriteLine($"Detected Broadcast Channel: {Channel.Name}");
-            var birthday = _dbContext.TblBirthdays.AsNoTracking().Where(d => d.Birthday.Month == DateTime.Now.Month && d.Birthday.Day == DateTime.Now.Day).ToList();
+            var birthday = await _dbContext.TblBirthdays.AsNoTracking().Where(d => d.Birthday.Month == DateTime.Now.Month && d.Birthday.Day == DateTime.Now.Day).ToListAsync();
 
             Console.WriteLine($"Total birthdays today: {birthday.Count}");
 
