@@ -24,18 +24,6 @@ namespace Gengar.Modules
 
             var nextBday = await _dbContext.TblBirthdays.FromSqlRaw("select userid, birthday, comments from tblbirthdays where to_char(birthday,'ddd')::int-to_char(now(),'DDD')::int between 0 and 15;").AsNoTracking().ToListAsync();
 
-            if (Context.Guild != null)
-            {
-                foreach (var user in nextBday.ToList())
-                {
-
-                    if (Context.Guild.GetUser(user.Userid) == null)
-                    {
-                        nextBday.Remove(user);
-                    }
-                }
-            }
-
             var numberOfBirthdays = nextBday.Count;
             string _content;
 
