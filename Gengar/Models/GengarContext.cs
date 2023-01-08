@@ -35,8 +35,6 @@ namespace Gengar.Models
                 entity.Property(e => e.Comments).HasColumnName("comments");
 
                 entity.Property(e => e.Userid).HasColumnName("userid").IsRequired();
-
-                entity.Property(e => e.DayOfYear).HasColumnName("dayofyear").IsRequired();
             });
 
             OnModelCreatingPartial(modelBuilder);
