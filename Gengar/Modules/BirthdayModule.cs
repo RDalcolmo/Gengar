@@ -48,9 +48,11 @@ namespace Gengar.Modules
         [SlashCommand("month", "Gets a list of all birthdays in the chosen month")]
         public async Task BirthdayInMonth([Summary(description: "Choose the month")] Month month)
         {
-            var users = await _birthdayService.GetUsersByMonth((int)month);
-            var numberOfBirthdays = users.Count;
+            var users = await _birthdayService.GetAllUsers();
 
+            users = users.Where(x => x.Birthday.Month == (int)month).ToList();
+
+            var numberOfBirthdays = users.Count;
             string _content;
 
             if (numberOfBirthdays == 0)

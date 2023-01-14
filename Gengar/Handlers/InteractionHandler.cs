@@ -92,8 +92,9 @@ namespace Gengar.Handlers
                 return;
             Console.WriteLine($"Detected Broadcast Channel: {Channel.Name}");
 
-            var birthday = await _birthdayService.GetTodaysBirthdays();
+            var birthday = await _birthdayService.GetAllUsers();
 
+            birthday = birthday.Where(x => x.Birthday.Month == DateTime.Today.Month && x.Birthday.Day == DateTime.Today.Day).ToList();
             var numberOfBirthdays = birthday.Count;
 
             if (numberOfBirthdays == 0)

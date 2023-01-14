@@ -36,11 +36,9 @@ namespace Gengar.Services
             return (await _dbContext.Birthdays.FindAsync(filter)).ToList();
         }
 
-        public async Task<List<Birthdays>> GetUsersByMonth(int month)
+        public async Task<List<Birthdays>> GetAllUsers()
         {
-            var filter = Builders<Birthdays>.Filter.Eq(x => x.Birthday.Month, month);
-
-            return (await _dbContext.Birthdays.FindAsync(filter)).ToList();
+            return (await _dbContext.Birthdays.FindAsync(Builders<Birthdays>.Filter.Empty)).ToList();
         }
 
         public async Task<List<Birthdays>> GetTodaysBirthdays()
