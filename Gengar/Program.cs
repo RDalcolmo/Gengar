@@ -7,6 +7,7 @@ using Gengar.Models;
 using Gengar.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Gengar
 {
@@ -31,6 +32,7 @@ namespace Gengar
                 .AddSingleton(_configuration)
                 .AddSingleton(_socketConfig)
                 .AddSingleton<MongoConnector>()
+                .AddSingleton<ILogger>()
                 .AddSingleton<BirthdayService>()
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
