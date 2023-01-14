@@ -2,7 +2,7 @@
 using Discord.Interactions;
 using Discord.WebSocket;
 using Gengar.Models;
-using Microsoft.EntityFrameworkCore;
+using Gengar.Services;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -22,13 +22,15 @@ namespace Gengar.Handlers
         private readonly InteractionService _handler;
         private readonly IServiceProvider _services;
         private readonly IConfiguration _configuration;
+        private readonly BirthdayService _birthdayService;
 
-        public InteractionHandler(DiscordSocketClient client, InteractionService handler, IServiceProvider services, IConfiguration configuration)
+        public InteractionHandler(DiscordSocketClient client, InteractionService handler, IServiceProvider services, IConfiguration configuration, BirthdayService birthdayService)
         {
             _client = client;
             _handler = handler;
             _services = services;
             _configuration = configuration;
+            _birthdayService = birthdayService;
         }
 
         public async Task InitializeAsync()
@@ -88,16 +90,20 @@ namespace Gengar.Handlers
 
             if (Channel == null)
                 return;
-            using var _dbContext = new GengarContext();
-
             Console.WriteLine($"Detected Broadcast Channel: {Channel.Name}");
-            var birthday = await _dbContext.TblBirthdays.AsNoTracking().Where(d => d.Birthday.Month == DateTime.Now.Month && d.Birthday.Day == DateTime.Now.Day).ToListAsync();
+
+            var birthday = await _birthdayService.GetTodaysBirthdays();
+
+            var numberOfBirthdays = birthday.Count;
+
+            if (numberOfBirthdays == 0)
+                return;
 
             Console.WriteLine($"Total birthdays today: {birthday.Count}");
 
             foreach (var user in birthday.ToList())
             {
-                var userInGuild = Guild.GetUser(user.Userid);
+                var userInGuild = Guild.GetUser(user._id);
 
                 if (userInGuild == null)
                 {
@@ -105,16 +111,11 @@ namespace Gengar.Handlers
                 }
             }
 
-            var numberOfBirthdays = birthday.Count;
-
-            if (numberOfBirthdays == 0)
-                return;
-
             string _content = $"There {(numberOfBirthdays > 1 ? $"are {numberOfBirthdays} birthdays" : "is 1 birthday")} today!";
 
             foreach (var person in birthday)
             {
-                _content += $"\nIt's <@{person.Userid}> birthday today!! Happy birthday!";
+                _content += $"\nIt's <@{person._id}> birthday today!! Happy birthday!";
             }
 
             await Channel.SendMessageAsync(_content);

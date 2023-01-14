@@ -1,9 +1,10 @@
 ﻿using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using Gengar.Database;
 using Gengar.Handlers;
 using Gengar.Models;
-using Microsoft.EntityFrameworkCore;
+using Gengar.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,7 +12,7 @@ namespace Gengar
 {
     public class Program
     {
-        internal static IConfiguration _configuration;
+        private readonly IConfiguration _configuration;
         private readonly IServiceProvider _services;
 
         private readonly DiscordSocketConfig _socketConfig = new()
@@ -29,6 +30,8 @@ namespace Gengar
             _services = new ServiceCollection()
                 .AddSingleton(_configuration)
                 .AddSingleton(_socketConfig)
+                .AddSingleton<MongoConnector>()
+                .AddSingleton<BirthdayService>()
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
                 .AddSingleton<InteractionHandler>()
