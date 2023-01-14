@@ -33,7 +33,6 @@ namespace Gengar
                 .AddSingleton(_configuration)
                 .AddSingleton(_socketConfig)
                 .AddSingleton<MongoConnector>()
-                .AddSingleton<Logger<MongoConnector>>()
                 .AddSingleton<BirthdayService>()
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))

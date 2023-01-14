@@ -9,7 +9,6 @@ namespace Gengar.Database
     public class MongoConnector
     {
         private IConfiguration _configuration;
-        private ILogger<MongoConnector> _Logger;
 
         private IMongoDatabase _Database;
         private IMongoDatabase Database
@@ -28,7 +27,7 @@ namespace Gengar.Database
                     }
                     catch (Exception ex)
                     {
-                        _Logger.LogCritical(ex, "Error connecting to database");
+                        Console.WriteLine(ex.Message);
                         throw;
                     }
                 }
@@ -37,10 +36,9 @@ namespace Gengar.Database
             }
         }
 
-        public MongoConnector(IConfiguration configuration, ILogger<MongoConnector> logger)
+        public MongoConnector(IConfiguration configuration)
         {
             _configuration = configuration;
-            _Logger = logger;
         }
 
         public IMongoCollection<Birthdays> Birthdays
