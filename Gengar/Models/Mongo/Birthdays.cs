@@ -12,6 +12,7 @@ namespace Gengar.Models.Mongo
     {
         [BsonRepresentation(BsonType.Int64)]
         public ulong _id { get; set; }
+        [BsonRepresentation(BsonType.DateTime)]
         public DateTime Birthday { get; set; }
     }
 }
