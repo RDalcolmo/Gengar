@@ -36,9 +36,9 @@ namespace Gengar.Modules
                 _content = $"There {(numberOfBirthdays > 1 ? $"are {numberOfBirthdays} upcoming birthdays" : "is 1 upcoming birthday")}!"
                             + $"\nThe next person's birthday is:";
 
-                foreach (var person in users.OrderBy(m => m.BirthdayDate.Month).ThenBy(d => d.BirthdayDate.Day))
+                foreach (var person in users.OrderBy(m => m.Birthday.Month).ThenBy(d => d.Birthday.Day))
                 {
-                    _content += $"\n<@{person._id}> on {person.BirthdayDate:MMMM dd}!";
+                    _content += $"\n<@{person._id}> on {person.Birthday:MMMM dd}!";
                 }
             }
             
@@ -62,9 +62,9 @@ namespace Gengar.Modules
                 _content = $"There {(numberOfBirthdays > 1 ? $"are {numberOfBirthdays} birthdays" : "is 1 birthday")} in the month of {month}!"
                             + $"\nBirthdays found in this month are:";
 
-                foreach (var person in users.OrderBy(m => m.BirthdayDate.Month).ThenBy(d => d.BirthdayDate.Day))
+                foreach (var person in users.OrderBy(m => m.Birthday.Month).ThenBy(d => d.Birthday.Day))
                 {
-                    _content += $"\n<@{person._id}> on {person.BirthdayDate:MMMM dd}!";
+                    _content += $"\n<@{person._id}> on {person.Birthday:MMMM dd}!";
                 }
             }
             
@@ -80,7 +80,7 @@ namespace Gengar.Modules
             if (person == null)
                 _content = "This person does not have a birthday registered in our database!";
             else
-                _content = $"<@{person._id}>'s Birthday is on {person.BirthdayDate:MMMM dd}";
+                _content = $"<@{person._id}>'s Birthday is on {person.Birthday:MMMM dd}";
 
             await RespondAsync(_content, ephemeral: true);
         }
@@ -105,7 +105,7 @@ namespace Gengar.Modules
             await _birthdayService.Patch(new Models.Mongo.Birthdays()
             {
                 _id = userid.Id,
-                BirthdayDate = new DateTime(2019, (int)month, day)
+                Birthday = new DateTime(2019, (int)month, day)
             });
 
             var _content = $"Added {userid.Mention} to the database on {month} {day}.";

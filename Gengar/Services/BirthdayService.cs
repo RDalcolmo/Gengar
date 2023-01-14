@@ -29,8 +29,8 @@ namespace Gengar.Services
             var next14days = today.AddDays(14);
 
             var filter = Builders<Birthdays>.Filter.And(
-                Builders<Birthdays>.Filter.Gte(x => x.BirthdayDate, today.Date),
-                Builders<Birthdays>.Filter.Lte(x => x.BirthdayDate, next14days.Date)
+                Builders<Birthdays>.Filter.Gte(x => x.Birthday, today.Date),
+                Builders<Birthdays>.Filter.Lte(x => x.Birthday, next14days.Date)
             );
 
             return (await _dbContext.Birthdays.FindAsync(filter)).ToList();
@@ -38,7 +38,7 @@ namespace Gengar.Services
 
         public async Task<List<Birthdays>> GetUsersByMonth(int month)
         {
-            var filter = Builders<Birthdays>.Filter.Eq(x => x.BirthdayDate.Month, month);
+            var filter = Builders<Birthdays>.Filter.Eq(x => x.Birthday.Month, month);
 
             return (await _dbContext.Birthdays.FindAsync(filter)).ToList();
         }
@@ -46,8 +46,8 @@ namespace Gengar.Services
         public async Task<List<Birthdays>> GetTodaysBirthdays()
         {
             var filter = Builders<Birthdays>.Filter.And(
-                Builders<Birthdays>.Filter.Eq(x => x.BirthdayDate.Month, DateTime.Today.Month),
-                Builders<Birthdays>.Filter.Eq(x => x.BirthdayDate.Day, DateTime.Today.Day));
+                Builders<Birthdays>.Filter.Eq(x => x.Birthday.Month, DateTime.Today.Month),
+                Builders<Birthdays>.Filter.Eq(x => x.Birthday.Day, DateTime.Today.Day));
 
             return (await _dbContext.Birthdays.FindAsync(filter)).ToList();
         }
@@ -62,7 +62,7 @@ namespace Gengar.Services
             var filter = Builders<Birthdays>.Filter.Eq(x => x._id, user._id);
             List<UpdateDefinition<Birthdays>> updateList = new()
             {
-                Builders<Birthdays>.Update.Set(x => x.BirthdayDate, user.BirthdayDate)
+                Builders<Birthdays>.Update.Set(x => x.Birthday, user.Birthday)
             };
 
             if (updateList.Any())
