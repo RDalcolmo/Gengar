@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using DnsClient.Internal;
 using Gengar.Database;
 using Gengar.Handlers;
 using Gengar.Models;
@@ -32,7 +33,7 @@ namespace Gengar
                 .AddSingleton(_configuration)
                 .AddSingleton(_socketConfig)
                 .AddSingleton<MongoConnector>()
-                .AddSingleton<ILogger>()
+                .AddSingleton<Logger<MongoConnector>>()
                 .AddSingleton<BirthdayService>()
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
