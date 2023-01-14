@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace Gengar.Models.Mongo
 {
+    [BsonIgnoreExtraElements]
     public class Birthdays
     {
         [BsonRepresentation(BsonType.Int64)]
