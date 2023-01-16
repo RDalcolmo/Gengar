@@ -22,7 +22,7 @@ namespace Gengar.Modules
         [SlashCommand("next", "Checks if there are any birthdays within 14 days")]
         public async Task CheckBirthdays()
         {
-            var users = await _birthdayService.GetUsersNextTwoWeeks();
+            var users = (await _birthdayService.GetAllUsers()).Where(b => b.Birthday.DayOfYear >= DateTime.Now.DayOfYear && b.Birthday.DayOfYear <= DateTime.Now.AddDays(14).DayOfYear).ToList();
 
             var numberOfBirthdays = users.Count;
             string _content;
