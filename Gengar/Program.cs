@@ -24,7 +24,6 @@ namespace Gengar
         {
             _configuration = new ConfigurationBuilder()
                 .AddEnvironmentVariables()
-                .AddJsonFile("appsettings.json")
                 .Build();
 
             _services = new ServiceCollection()
