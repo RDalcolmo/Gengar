@@ -1,14 +1,11 @@
 ﻿using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
-using DnsClient.Internal;
 using Gengar.Database;
 using Gengar.Handlers;
-using Gengar.Models;
 using Gengar.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace Gengar
 {
@@ -19,7 +16,7 @@ namespace Gengar
 
         private readonly DiscordSocketConfig _socketConfig = new()
         {
-            GatewayIntents = GatewayIntents.GuildMessages | GatewayIntents.DirectMessages | GatewayIntents.Guilds,
+            GatewayIntents = GatewayIntents.GuildMessages | GatewayIntents.DirectMessages | GatewayIntents.Guilds | GatewayIntents.GuildMembers,
             AlwaysDownloadUsers = true,
         };
 
@@ -27,6 +24,7 @@ namespace Gengar
         {
             _configuration = new ConfigurationBuilder()
                 .AddEnvironmentVariables()
+                .AddJsonFile("appsettings.json")
                 .Build();
 
             _services = new ServiceCollection()
