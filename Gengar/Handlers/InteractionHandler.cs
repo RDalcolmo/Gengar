@@ -69,7 +69,7 @@ namespace Gengar.Handlers
                 Console.WriteLine("Action started.");
                 // Schedule it to be called every 24 hours
                 // timer repeates call to RemoveScheduledAccounts every 24 hours.
-                _timer = new Timer(BroadcastBirthday, null, firstInterval, interval);
+                _timer = new Timer(BroadcastBirthday, null, TimeSpan.Zero, interval);
             }
             Console.WriteLine("Starting action.");
             // no need to await this call here because this task is scheduled to run much much later.
