@@ -1,3 +1,3 @@
 # Birthday-Bot
 
-[![Docker Image CI](https://github.com/RDalcolmo/Gengar/actions/workflows/docker-image.yml/badge.svg?branch=master)](https://github.com/RDalcolmo/Gengar/actions/workflows/docker-image.yml)
+[![Docker](https://github.com/RDalcolmo/Gengar/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/RDalcolmo/Gengar/actions/workflows/docker-publish.yml)
