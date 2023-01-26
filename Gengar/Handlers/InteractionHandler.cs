@@ -48,14 +48,14 @@ namespace Gengar.Handlers
             _client.InteractionCreated += HandleInteraction;
         }
 
-        private Task DisconnectedAsync(Exception arg)
+        private async Task DisconnectedAsync(Exception arg)
         {
             Console.WriteLine($"Stopping service: {arg.Message}");
             _timer?.Dispose();
-            return Task.CompletedTask;
+            await Task.CompletedTask;
         }
 
-        private Task ConnectedAsync()
+        private async Task ConnectedAsync()
         {
             TimeSpan interval = TimeSpan.FromHours(24);
             //calculate time to run the first time & delay to set the timer
@@ -73,8 +73,7 @@ namespace Gengar.Handlers
             }
             Console.WriteLine("Starting action.");
             // no need to await this call here because this task is scheduled to run much much later.
-            Task.Run(action);
-            return Task.CompletedTask;
+            await Task.Run(action);
         }
 
         public async void BroadcastBirthday(object? state)
