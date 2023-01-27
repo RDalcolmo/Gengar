@@ -1,7 +1,7 @@
-FROM mcr.microsoft.com/dotnet/runtime:7.0 AS base
+FROM mcr.microsoft.com/dotnet/runtime:7.0.2-bullseye-slim AS base
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0.102-bullseye-slim AS build
 WORKDIR /src
 COPY ["Gengar/Gengar.csproj", "Gengar/"]
 RUN dotnet restore "Gengar/Gengar.csproj"
