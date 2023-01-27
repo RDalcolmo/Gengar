@@ -3,7 +3,6 @@ using Discord.Interactions;
 using Gengar.Models;
 using Gengar.Services;
 using Microsoft.Extensions.Configuration;
-using System;
 
 namespace Gengar.Modules
 {

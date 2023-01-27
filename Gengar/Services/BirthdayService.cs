@@ -1,13 +1,6 @@
-﻿using Discord;
-using Gengar.Database;
+﻿using Gengar.Database;
 using Gengar.Models.Mongo;
-using MongoDB.Bson;
 using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Gengar.Services
 {

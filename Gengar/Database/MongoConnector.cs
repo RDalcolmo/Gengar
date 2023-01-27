@@ -1,7 +1,5 @@
-﻿using Discord;
-using Gengar.Models.Mongo;
+﻿using Gengar.Models.Mongo;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
 namespace Gengar.Database
