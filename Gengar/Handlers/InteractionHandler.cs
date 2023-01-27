@@ -85,7 +85,7 @@ namespace Gengar.Handlers
 
             var birthday = await _birthdayService.GetAllUsers();
 
-            birthday = birthday.Where(x => x.Birthday.Month == DateTime.Today.Month && x.Birthday.Day == DateTime.Today.Day).ToList();
+            birthday = birthday.Where(x => x.Birthday.Month == DateTime.Today.Month && x.Birthday.Day == DateTime.Today.Day && x.CurrentDay != DateTime.Now.DayOfYear).ToList();
             var numberOfBirthdays = birthday.Count;
 
             if (numberOfBirthdays == 0)
@@ -107,6 +107,7 @@ namespace Gengar.Handlers
 
             foreach (var person in birthday)
             {
+                await _birthdayService.SetCurrentDay(person._id);
                 _content += $"\nIt's <@{person._id}> birthday today!! Happy birthday!";
             }
 

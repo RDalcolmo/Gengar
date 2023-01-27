@@ -11,5 +11,7 @@ namespace Gengar.Models.Mongo
         [BsonRepresentation(BsonType.DateTime)]
         [BsonElement("birthday")]
         public DateTime Birthday { get; set; }
+
+        public short CurrentDay { get; set; }
     }
 }

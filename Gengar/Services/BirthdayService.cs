@@ -64,6 +64,15 @@ namespace Gengar.Services
             }
         }
 
+        public async Task SetCurrentDay(ulong personId)
+        {
+            var filter = Builders<Birthdays>.Filter.Eq(x => x._id, personId);
+
+            var update = Builders<Birthdays>.Update.Set(x => x.CurrentDay, DateTime.Now.DayOfYear);
+
+            await _dbContext.Birthdays.UpdateOneAsync(filter, update);
+        }
+
         public async Task Remove(ulong userId)
         {
             var filter = Builders<Birthdays>.Filter.Eq(x => x._id, userId);
