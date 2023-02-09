@@ -87,6 +87,7 @@ namespace Gengar.Modules
         }
 
         [SlashCommand("remove", "Removes a birthday from the database")]
+        [DefaultMemberPermissions(GuildPermission.Administrator)]
         [RequireOwner]
         public async Task RemoveUser([Summary(description: "Discord user ID")] IUser userid)
         {
@@ -98,6 +99,7 @@ namespace Gengar.Modules
         }
 
         [SlashCommand("add", "Adds a birthday to the database")]
+        [DefaultMemberPermissions(GuildPermission.Administrator)]
         [RequireOwner]
         public async Task AddUser([Summary(description: "Discord user ID")] IUser userid,
                                   [Summary(description: "Birthday month")] Month month,
@@ -115,6 +117,7 @@ namespace Gengar.Modules
         }
 
         [SlashCommand("bcast", "Broadcasts the birthday messages to the channel set")]
+        [DefaultMemberPermissions(GuildPermission.Administrator)]
         [RequireOwner]
         [RequireContext(ContextType.Guild)]
         public async Task Broadcast()
@@ -168,7 +171,7 @@ namespace Gengar.Modules
     }
 
     [Group("bcast", "Group owner commands")]
-    [RequireUserPermission(GuildPermission.ManageGuild)]
+    [DefaultMemberPermissions(GuildPermission.ManageGuild)]
     [RequireContext(ContextType.Guild)]
     public class RegistrationModule : InteractionModuleBase<SocketInteractionContext>
     {
