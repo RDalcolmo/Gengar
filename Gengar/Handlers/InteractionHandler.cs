@@ -81,10 +81,6 @@ namespace Gengar.Handlers
             var birthday = await _birthdayService.GetAllUsers();
 
             birthday = birthday.Where(x => x.Birthday.Month == DateTime.Today.Month && x.Birthday.Day == DateTime.Today.Day && x.CurrentDay != DateTime.Now.DayOfYear).ToList();
-            var numberOfBirthdays = birthday.Count;
-
-            if (numberOfBirthdays == 0)
-                return;
 
             Console.WriteLine($"Total birthdays today: {birthday.Count}");
 
@@ -97,6 +93,11 @@ namespace Gengar.Handlers
                     birthday.Remove(user);
                 }
             }
+
+            var numberOfBirthdays = birthday.Count;
+
+            if (numberOfBirthdays == 0)
+                return;
 
             string _content = $"There {(numberOfBirthdays > 1 ? $"are {numberOfBirthdays} birthdays" : "is 1 birthday")} today!";
 
