@@ -49,18 +49,8 @@ namespace Gengar.Handlers
 
         private async Task ConnectedAsync()
         {
-            TimeSpan interval = TimeSpan.FromMinutes(30);
-
-            void action()
-            {
-                Console.WriteLine("Action started.");
-                // Schedule it to be called every 24 hours
-                // timer repeates call to RemoveScheduledAccounts every 24 hours.
-                _timer = new Timer(BroadcastBirthday, null, TimeSpan.Zero, interval);
-            }
-            Console.WriteLine("Starting action.");
-            // no need to await this call here because this task is scheduled to run much much later.
-            await Task.Run(action);
+            Console.WriteLine($"Starting service...");
+            await Task.CompletedTask;
         }
 
         public async void BroadcastBirthday(object? state)
@@ -119,6 +109,19 @@ namespace Gengar.Handlers
             // Since Global Commands take around 1 hour to register, we should use a test guild to instantly update and test our commands.
 
             await _handler.RegisterCommandsGloballyAsync(true);
+
+            TimeSpan interval = TimeSpan.FromMinutes(30);
+
+            void action()
+            {
+                Console.WriteLine("Action started.");
+                // Schedule it to be called every 24 hours
+                // timer repeates call to RemoveScheduledAccounts every 24 hours.
+                _timer = new Timer(BroadcastBirthday, null, TimeSpan.Zero, interval);
+            }
+            Console.WriteLine("Starting action.");
+            // no need to await this call here because this task is scheduled to run much much later.
+            await Task.Run(action);
         }
 
         private async Task HandleInteraction(SocketInteraction interaction)
