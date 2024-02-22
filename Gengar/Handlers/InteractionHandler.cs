@@ -43,7 +43,6 @@ namespace Gengar.Handlers
         private async Task DisconnectedAsync(Exception arg)
         {
             Console.WriteLine($"Stopping service: {arg.Message}");
-            _timer?.Dispose();
             await Task.CompletedTask;
         }
 
