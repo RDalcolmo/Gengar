@@ -59,6 +59,6 @@ namespace Gengar
             await Task.Delay(Timeout.Infinite);
         }
 
-        private async Task LogAsync(LogMessage message) => Console.WriteLine(message.ToString());
+        private async Task LogAsync(LogMessage message) => await Console.Out.WriteLineAsync(message.ToString());
     }
 }

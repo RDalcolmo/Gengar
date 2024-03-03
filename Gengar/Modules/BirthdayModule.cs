@@ -122,20 +122,20 @@ namespace Gengar.Modules
         [RequireContext(ContextType.Guild)]
         public async Task Broadcast()
         {
-            Console.WriteLine($"Broadcasting today's birthdays: {DateTime.Today.ToLongDateString()}");
+            await Console.Out.WriteLineAsync($"Broadcasting today's birthdays: {DateTime.Today.ToLongDateString()}");
 
             var Guild = Context.Guild;
 
             if (Guild == null)
                 return;
 
-            Console.WriteLine($"Detected Guild: {Guild.Name}");
+            await Console.Out.WriteLineAsync($"Detected Guild: {Guild.Name}");
             var Channel = Guild.GetTextChannel(Convert.ToUInt64(_configuration["DiscordChannel"]));
 
             if (Channel == null)
                 return;
 
-            Console.WriteLine($"Detected Broadcast Channel: {Channel.Name}");
+            await Console.Out.WriteLineAsync($"Detected Broadcast Channel: {Channel.Name}");
 
             var birthday = await _birthdayService.GetAllUsers();
             birthday = birthday.Where(x => x.Birthday.Month == DateTime.Today.Month && x.Birthday.Day == DateTime.Today.Day).ToList();
@@ -148,7 +148,7 @@ namespace Gengar.Modules
                 return;
             }
 
-            Console.WriteLine($"Total birthdays today: {birthday.Count}");
+            await Console.Out.WriteLineAsync($"Total birthdays today: {birthday.Count}");
 
             foreach (var user in birthday.ToList())
             {

@@ -42,65 +42,72 @@ namespace Gengar.Handlers
 
         private async Task DisconnectedAsync(Exception arg)
         {
-            Console.WriteLine($"Stopping service: {arg.Message}");
+            await Console.Out.WriteLineAsync($"Stopping service: {arg.Message}");
             await Task.CompletedTask;
         }
 
         private async Task ConnectedAsync()
         {
-            Console.WriteLine($"Starting service...");
+            await Console.Out.WriteLineAsync($"Starting service...");
             await Task.CompletedTask;
         }
 
         public async void BroadcastBirthday(object? state)
         {
-            Console.WriteLine($"Broadcasting today's birthdays: {DateTime.Today.ToLongDateString()}");
-            var Guild = _client.Guilds.FirstOrDefault();
-
-            if (Guild == null)
-                return;
-
-            Console.WriteLine($"Detected Guild: {Guild.Name}");
-            var Channel = Guild.GetTextChannel(Convert.ToUInt64(_configuration["DiscordChannel"]));
-
-            if (Channel == null)
-                return;
-            Console.WriteLine($"Detected Broadcast Channel: {Channel.Name}");
-
-            var birthday = await _birthdayService.GetAllUsers();
-
-            birthday = birthday.Where(x => x.Birthday.Month == DateTime.Today.Month && x.Birthday.Day == DateTime.Today.Day && x.CurrentDay != DateTime.Now.DayOfYear).ToList();
-
-            Console.WriteLine($"Total birthdays today: {birthday.Count}");
-
-            foreach (var user in birthday.ToList())
+            try
             {
-                var userInGuild = Guild.GetUser(user._id);
+                await Console.Out.WriteLineAsync($"Broadcasting today's birthdays: {DateTime.Today.ToLongDateString()}");
+                var Guild = _client.Guilds.FirstOrDefault();
 
-                if (userInGuild == null)
+                if (Guild == null)
+                    return;
+
+                await Console.Out.WriteLineAsync($"Detected Guild: {Guild.Name}");
+                var Channel = Guild.GetTextChannel(Convert.ToUInt64(_configuration["DiscordChannel"]));
+
+                if (Channel == null)
+                    return;
+                await Console.Out.WriteLineAsync($"Detected Broadcast Channel: {Channel.Name}");
+
+                var birthday = await _birthdayService.GetAllUsers();
+
+                birthday = birthday.Where(x => x.Birthday.Month == DateTime.Today.Month && x.Birthday.Day == DateTime.Today.Day && x.CurrentDay != DateTime.Now.DayOfYear).ToList();
+
+                await Console.Out.WriteLineAsync($"Total birthdays today: {birthday.Count}");
+
+                foreach (var user in birthday.ToList())
                 {
-                    birthday.Remove(user);
+                    var userInGuild = Guild.GetUser(user._id);
+
+                    if (userInGuild == null)
+                    {
+                        birthday.Remove(user);
+                    }
                 }
+
+                var numberOfBirthdays = birthday.Count;
+
+                if (numberOfBirthdays == 0)
+                    return;
+
+                string _content = $"There {(numberOfBirthdays > 1 ? $"are {numberOfBirthdays} birthdays" : "is 1 birthday")} today!";
+
+                foreach (var person in birthday)
+                {
+                    await _birthdayService.SetCurrentDay(person._id);
+                    _content += $"\nIt's <@{person._id}> birthday today!! Happy birthday!";
+                }
+
+                await Channel.SendMessageAsync(_content);
             }
-
-            var numberOfBirthdays = birthday.Count;
-
-            if (numberOfBirthdays == 0)
-                return;
-
-            string _content = $"There {(numberOfBirthdays > 1 ? $"are {numberOfBirthdays} birthdays" : "is 1 birthday")} today!";
-
-            foreach (var person in birthday)
+            catch (Exception ex)
             {
-                await _birthdayService.SetCurrentDay(person._id);
-                _content += $"\nIt's <@{person._id}> birthday today!! Happy birthday!";
+                await Console.Out.WriteLineAsync(ex.Message);
             }
-
-            await Channel.SendMessageAsync(_content);
         }
 
         private async Task LogAsync(LogMessage log)
-            => Console.WriteLine(log);
+            => await Console.Out.WriteLineAsync(log.ToString());
 
         private async Task ReadyAsync()
         {
@@ -118,7 +125,7 @@ namespace Gengar.Handlers
                 // timer repeates call to RemoveScheduledAccounts every 24 hours.
                 _timer = new Timer(BroadcastBirthday, null, TimeSpan.Zero, interval);
             }
-            Console.WriteLine("Starting action.");
+            await Console.Out.WriteLineAsync("Starting action.");
             // no need to await this call here because this task is scheduled to run much much later.
             await Task.Run(action);
         }
@@ -137,7 +144,7 @@ namespace Gengar.Handlers
                     switch (result.Error)
                     {
                         case InteractionCommandError.UnmetPrecondition:
-                            Console.WriteLine(result.ErrorReason);
+                            await Console.Out.WriteLineAsync(result.ErrorReason);
                             break;
                         default:
                             break;
