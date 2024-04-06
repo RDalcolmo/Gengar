@@ -3,6 +3,7 @@ using Discord.Interactions;
 using Gengar.Models;
 using Gengar.Services;
 using Microsoft.Extensions.Configuration;
+using System.Text;
 
 namespace Gengar.Modules
 {
@@ -52,24 +53,24 @@ namespace Gengar.Modules
             users = users.Where(x => x.Birthday.Month == (int)month).ToList();
 
             var numberOfBirthdays = users.Count;
-            string _content;
+            StringBuilder _content = new();
 
             if (numberOfBirthdays == 0)
             {
-                _content = "There are no birthdays in this month!";
+                _content.Append("There are no birthdays in this month!");
             }
             else
             {
-                _content = $"There {(numberOfBirthdays > 1 ? $"are {numberOfBirthdays} birthdays" : "is 1 birthday")} in the month of {month}!"
-                            + $"\nBirthdays found in this month are:";
+                _content.AppendLine($"There {(numberOfBirthdays > 1 ? $"are {numberOfBirthdays} birthdays" : "is 1 birthday")} in the month of {month}!")
+                        .AppendLine($"Birthdays found in this month are:");
 
                 foreach (var person in users.OrderBy(m => m.Birthday.Month).ThenBy(d => d.Birthday.Day))
                 {
-                    _content += $"\n<@{person._id}> on {person.Birthday:MMMM dd}!";
+                    _content.AppendLine($"<@{person._id}> on {person.Birthday:MMMM dd}!");
                 }
             }
             
-            await RespondAsync(_content, ephemeral: true);
+            await RespondAsync(_content.ToString(), ephemeral: true);
         }
 
         [SlashCommand("when", "Gets the birthday date of the given discord user ID")]
@@ -160,13 +161,13 @@ namespace Gengar.Modules
                 }
             }
   
-            string _content = $"There {(numberOfBirthdays > 1 ? $"are {numberOfBirthdays} birthdays" : "is 1 birthday")} today!";
+            StringBuilder _content = new($"There {(numberOfBirthdays > 1 ? $"are {numberOfBirthdays} birthdays" : "is 1 birthday")} today!\n");
             foreach (var person in birthday)
             {
-                _content += $"\nIt's <@{person._id}> birthday today!! Happy birthday!";
+                _content.AppendLine($"It's <@{person._id}> birthday today!! Happy birthday!");
             }
 
-            await Channel.SendMessageAsync(_content);    
+            await Channel.SendMessageAsync(_content.ToString());    
         }
     }
 

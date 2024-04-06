@@ -39,7 +39,7 @@ namespace Gengar
         }
 
 
-        static void Main(string[] args) => new Program().RunAsync().GetAwaiter().GetResult();
+        static void Main() => new Program().RunAsync().GetAwaiter().GetResult();
 
         public async Task RunAsync()
         {

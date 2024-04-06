@@ -4,6 +4,7 @@ using Discord.WebSocket;
 using Gengar.Services;
 using Microsoft.Extensions.Configuration;
 using System.Reflection;
+using System.Text;
 
 namespace Gengar.Handlers
 {
@@ -90,15 +91,15 @@ namespace Gengar.Handlers
                 if (numberOfBirthdays == 0)
                     return;
 
-                string _content = $"There {(numberOfBirthdays > 1 ? $"are {numberOfBirthdays} birthdays" : "is 1 birthday")} today!";
+                StringBuilder _content = new($"There {(numberOfBirthdays > 1 ? $"are {numberOfBirthdays} birthdays" : "is 1 birthday")} today!");
 
                 foreach (var person in birthday)
                 {
                     await _birthdayService.SetCurrentDay(person._id);
-                    _content += $"\nIt's <@{person._id}> birthday today!! Happy birthday!";
+                    _content.Append($"\nIt's <@{person._id}> birthday today!! Happy birthday!");
                 }
 
-                await Channel.SendMessageAsync(_content);
+                await Channel.SendMessageAsync(_content.ToString());
             }
             catch (Exception ex)
             {
