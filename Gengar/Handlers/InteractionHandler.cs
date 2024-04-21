@@ -91,7 +91,7 @@ namespace Gengar.Handlers
                 if (numberOfBirthdays == 0)
                     return;
 
-                StringBuilder _content = new($"@silent There {(numberOfBirthdays > 1 ? $"are {numberOfBirthdays} birthdays" : "is 1 birthday")} today!");
+                StringBuilder _content = new($"There {(numberOfBirthdays > 1 ? $"are {numberOfBirthdays} birthdays" : "is 1 birthday")} today!");
 
                 foreach (var person in birthday)
                 {
