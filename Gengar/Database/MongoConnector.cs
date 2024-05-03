@@ -17,7 +17,7 @@ namespace Gengar.Database
             {
                 var mcs = MongoClientSettings.FromUrl(new MongoUrl(_configuration["ConnectionString"]));
 
-                IMongoClient client = client = new MongoClient(mcs);
+                MongoClient client = new(mcs);
 
                 Database = client.GetDatabase("discordbots");
             }
