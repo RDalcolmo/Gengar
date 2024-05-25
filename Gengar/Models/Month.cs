@@ -1,18 +1,17 @@
-﻿namespace Gengar.Models
+﻿namespace Gengar.Models;
+
+public enum Month
 {
-    public enum Month
-    {
-        January = 1,
-        February,
-        March,
-        April,
-        May,
-        June,
-        July,
-        August,
-        September,
-        October,
-        November,
-        December
-    }
+    January = 1,
+    February,
+    March,
+    April,
+    May,
+    June,
+    July,
+    August,
+    September,
+    October,
+    November,
+    December
 }

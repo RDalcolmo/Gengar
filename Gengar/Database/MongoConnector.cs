@@ -2,36 +2,35 @@
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 
-namespace Gengar.Database
+namespace Gengar.Database;
+
+public class MongoConnector
 {
-    public class MongoConnector
+    private readonly IConfiguration _configuration;
+    private readonly IMongoDatabase Database;
+
+    public MongoConnector(IConfiguration configuration)
     {
-        private readonly IConfiguration _configuration;
-        private readonly IMongoDatabase Database;
+        _configuration = configuration;
 
-        public MongoConnector(IConfiguration configuration)
+        try
         {
-            _configuration = configuration;
+            var mcs = MongoClientSettings.FromUrl(new MongoUrl(_configuration["ConnectionString"]));
 
-            try
-            {
-                var mcs = MongoClientSettings.FromUrl(new MongoUrl(_configuration["ConnectionString"]));
+            MongoClient client = new(mcs);
 
-                MongoClient client = new(mcs);
-
-                Database = client.GetDatabase("discordbots");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                throw;
-            }
+            Database = client.GetDatabase("discordbots");
         }
-
-        public IMongoCollection<Birthdays> Birthdays
+        catch (Exception ex)
         {
-            get { return Database.GetCollection<Birthdays>("birthdays"); }
+            Console.WriteLine(ex.Message);
+            throw;
         }
-
     }
+
+    public IMongoCollection<Birthdays> Birthdays
+    {
+        get { return Database.GetCollection<Birthdays>("birthdays"); }
+    }
+
 }
