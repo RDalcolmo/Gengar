@@ -32,5 +32,4 @@ public class MongoConnector
     {
         get { return Database.GetCollection<Birthdays>("birthdays"); }
     }
-
 }

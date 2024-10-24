@@ -3,6 +3,7 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using Gengar.Database;
 using Gengar.Handlers;
+using Gengar.Options;
 using Gengar.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,6 +29,7 @@ public class Program
             .Build();
 
         _services = new ServiceCollection()
+            .AddOptions()
             .AddSingleton(_configuration)
             .AddSingleton(_socketConfig)
             .AddSingleton<MongoConnector>()
@@ -35,9 +37,9 @@ public class Program
             .AddSingleton<DiscordSocketClient>()
             .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
             .AddSingleton<InteractionHandler>()
+            .Configure<DiscordOptions>(_configuration.GetSection(nameof(DiscordOptions)))
             .BuildServiceProvider();
     }
-
 
     static void Main() => new Program().RunAsync().GetAwaiter().GetResult();
 

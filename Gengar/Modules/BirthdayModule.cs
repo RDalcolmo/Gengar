@@ -1,8 +1,10 @@
 ﻿using Discord;
 using Discord.Interactions;
 using Gengar.Models;
+using Gengar.Options;
 using Gengar.Services;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System.Text;
 
 namespace Gengar.Modules;
@@ -10,12 +12,12 @@ namespace Gengar.Modules;
 [Group("bday", "Birthday commands")]
 public class BirthdayModule : InteractionModuleBase<SocketInteractionContext>
 {
-    private readonly IConfiguration _configuration;
+    private readonly IOptions<DiscordOptions> _options;
     private readonly BirthdayService _birthdayService;
 
-    public BirthdayModule(IConfiguration configuration, BirthdayService birthdayService)
+    public BirthdayModule(IOptions<DiscordOptions> options, BirthdayService birthdayService)
     {
-        _configuration = configuration;
+        _options = options;
         _birthdayService = birthdayService;
     }
 
@@ -137,7 +139,7 @@ public class BirthdayModule : InteractionModuleBase<SocketInteractionContext>
         }
 
         await Console.Out.WriteLineAsync($"Detected Guild: {Guild.Name}");
-        var Channel = Guild.GetTextChannel(Convert.ToUInt64(_configuration["DiscordChannel"]));
+        var Channel = Guild.GetTextChannel(_options.Value.ChannelId);
 
         if (Channel == null)
         {
@@ -184,26 +186,18 @@ public class BirthdayModule : InteractionModuleBase<SocketInteractionContext>
 [RequireContext(ContextType.Guild)]
 public class RegistrationModule : InteractionModuleBase<SocketInteractionContext>
 {
-    private readonly IConfiguration _configuration;
+    private readonly IOptions<DiscordOptions> _options;
 
-    public RegistrationModule(IConfiguration configuration)
+    public RegistrationModule(IOptions<DiscordOptions> options)
     {
-        _configuration = configuration;
+        _options = options;
     }
 
     [SlashCommand("set", "Sets a new channel to broadcast birthdays in")]
     public async Task SetToChannel()
     {
-        string _content;
-        if (Convert.ToUInt64(_configuration["DicordChannel"]) != Context.Channel.Id)
-        {
-            _configuration["DicordChannel"] = Context.Channel.Id.ToString();
-            _content = "Broadcasting channel has been changed. Birthday messages will now be posted here.";
-        }
-        else
-        {
-            _content = "Messages are already being posted in the current channel";
-        }
+        _options.Value.ChannelId = Context.Channel.Id;
+        string _content = "Broadcasting channel has been changed. Birthday messages will now be posted here.";
 
         await RespondAsync(_content, ephemeral: true);
     }
@@ -211,7 +205,7 @@ public class RegistrationModule : InteractionModuleBase<SocketInteractionContext
     [SlashCommand("remove", "Stops broadcasting birthdays to the server")]
     public async Task RemoveFromChannel()
     {
-        _configuration["DiscordChannel"] = "";
+        _options.Value.ChannelId = 0;
         await RespondAsync("The current broadcasting channel has been removed.", ephemeral: true);
     }
 }

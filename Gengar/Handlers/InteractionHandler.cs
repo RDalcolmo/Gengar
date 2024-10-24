@@ -1,8 +1,10 @@
 ﻿using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using Gengar.Options;
 using Gengar.Services;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System.Reflection;
 using System.Text;
 
@@ -14,15 +16,15 @@ public class InteractionHandler
     private readonly DiscordSocketClient _client;
     private readonly InteractionService _handler;
     private readonly IServiceProvider _services;
-    private readonly IConfiguration _configuration;
     private readonly BirthdayService _birthdayService;
+    private readonly IOptions<DiscordOptions> _options;
 
-    public InteractionHandler(DiscordSocketClient client, InteractionService handler, IServiceProvider services, IConfiguration configuration, BirthdayService birthdayService)
+    public InteractionHandler(DiscordSocketClient client, InteractionService handler, IServiceProvider services, IOptions<DiscordOptions> options, BirthdayService birthdayService)
     {
         _client = client;
         _handler = handler;
         _services = services;
-        _configuration = configuration;
+        _options = options;
         _birthdayService = birthdayService;
     }
 
@@ -57,6 +59,11 @@ public class InteractionHandler
     {
         try
         {
+            if (_options.Value.ChannelId == 0)
+            {
+                return;
+            }
+
             await Console.Out.WriteLineAsync($"Broadcasting today's birthdays: {DateTime.Today.ToLongDateString()}");
             var Guild = _client.Guilds.FirstOrDefault();
 
@@ -66,7 +73,7 @@ public class InteractionHandler
             }
 
             await Console.Out.WriteLineAsync($"Detected Guild: {Guild.Name}");
-            var Channel = Guild.GetTextChannel(Convert.ToUInt64(_configuration["DiscordChannel"]));
+            var Channel = Guild.GetTextChannel(_options.Value.ChannelId);
 
             if (Channel == null)
             {

@@ -51,12 +51,12 @@ public class BirthdayService
     public async Task Patch(Birthdays user)
     {
         var filter = Builders<Birthdays>.Filter.Eq(x => x._id, user._id);
-        List<UpdateDefinition<Birthdays>> updateList = new()
-        {
+        List<UpdateDefinition<Birthdays>> updateList =
+        [
             Builders<Birthdays>.Update.Set(x => x.Birthday, user.Birthday)
-        };
+        ];
 
-        if (updateList.Any())
+        if (updateList.Count != 0)
         {
             UpdateDefinition<Birthdays> allUpdates = Builders<Birthdays>.Update.Combine(updateList);
 
