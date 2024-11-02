@@ -4,13 +4,15 @@ using Discord.WebSocket;
 using Gengar.Options;
 using Gengar.Services;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Reflection;
 using System.Text;
 
-namespace Gengar.Handlers;
+namespace Gengar.Processors;
 
-public class InteractionHandler
+public class DiscordBotProcessor : BackgroundService
 {
     private static Timer? _timer;
     private readonly DiscordSocketClient _client;
@@ -18,14 +20,25 @@ public class InteractionHandler
     private readonly IServiceProvider _services;
     private readonly BirthdayService _birthdayService;
     private readonly IOptions<DiscordOptions> _options;
+    private readonly ILogger<DiscordBotProcessor> _logger;
 
-    public InteractionHandler(DiscordSocketClient client, InteractionService handler, IServiceProvider services, IOptions<DiscordOptions> options, BirthdayService birthdayService)
+    public DiscordBotProcessor(DiscordSocketClient client, InteractionService handler,
+                               IServiceProvider services, IOptions<DiscordOptions> options,
+                               BirthdayService birthdayService, ILogger<DiscordBotProcessor> logger)
     {
         _client = client;
         _handler = handler;
         _services = services;
         _options = options;
         _birthdayService = birthdayService;
+        _logger = logger;
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        await InitializeAsync();
+        await _client.LoginAsync(TokenType.Bot, _options.Value.BotToken);
+        await _client.StartAsync();
     }
 
     public async Task InitializeAsync()
@@ -45,13 +58,13 @@ public class InteractionHandler
 
     private async Task DisconnectedAsync(Exception arg)
     {
-        await Console.Out.WriteLineAsync($"Stopping service: {arg.Message}");
+        _logger.LogInformation("Stopping service: {message}", arg.Message);
         await Task.CompletedTask;
     }
 
     private async Task ConnectedAsync()
     {
-        await Console.Out.WriteLineAsync($"Starting service...");
+        _logger.LogInformation($"Starting service...");
         await Task.CompletedTask;
     }
 
@@ -64,7 +77,7 @@ public class InteractionHandler
                 return;
             }
 
-            await Console.Out.WriteLineAsync($"Broadcasting today's birthdays: {DateTime.Today.ToLongDateString()}");
+            _logger.LogInformation("Broadcasting today's birthdays: {date}",DateTime.Today.ToLongDateString());
             var Guild = _client.Guilds.FirstOrDefault();
 
             if (Guild == null)
@@ -72,7 +85,7 @@ public class InteractionHandler
                 return;
             }
 
-            await Console.Out.WriteLineAsync($"Detected Guild: {Guild.Name}");
+            _logger.LogInformation("Detected Guild: {guild}", Guild.Name);
             var Channel = Guild.GetTextChannel(_options.Value.ChannelId);
 
             if (Channel == null)
@@ -80,13 +93,13 @@ public class InteractionHandler
                 return;
             }
 
-            await Console.Out.WriteLineAsync($"Detected Broadcast Channel: {Channel.Name}");
+            _logger.LogInformation("Detected Broadcast Channel: {channel}", Channel.Name);
 
             var birthday = await _birthdayService.GetAllUsers();
 
             birthday = birthday.Where(x => x.Birthday.Month == DateTime.Today.Month && x.Birthday.Day == DateTime.Today.Day && x.CurrentDay != DateTime.Now.DayOfYear).ToList();
 
-            await Console.Out.WriteLineAsync($"Total birthdays today: {birthday.Count}");
+            _logger.LogInformation("Total birthdays today: {count}", birthday.Count);
 
             foreach (var user in birthday.ToList())
             {
@@ -117,7 +130,7 @@ public class InteractionHandler
         }
         catch (Exception ex)
         {
-            await Console.Out.WriteLineAsync(ex.Message);
+            _logger.LogError("Error: {error}", ex.Message);
         }
     }
 
@@ -135,12 +148,12 @@ public class InteractionHandler
 
         void action()
         {
-            Console.WriteLine("Action started.");
+            _logger.LogInformation("Action started.");
             // Schedule it to be called every 24 hours
             // timer repeates call to RemoveScheduledAccounts every 24 hours.
             _timer = new Timer(BroadcastBirthday, null, TimeSpan.Zero, interval);
         }
-        await Console.Out.WriteLineAsync("Starting action.");
+        _logger.LogInformation("Starting action.");
         // no need to await this call here because this task is scheduled to run much much later.
         await Task.Run(action);
     }
@@ -160,7 +173,7 @@ public class InteractionHandler
                 switch (result.Error)
                 {
                     case InteractionCommandError.UnmetPrecondition:
-                        await Console.Out.WriteLineAsync(result.ErrorReason);
+                        _logger.LogError("Error: {error}", result.ErrorReason);
                         break;
                     default:
                         break;
