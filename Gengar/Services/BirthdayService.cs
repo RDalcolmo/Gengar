@@ -56,7 +56,7 @@ public class BirthdayService
             Builders<Birthdays>.Update.Set(x => x.Birthday, user.Birthday)
         ];
 
-        if (updateList.Count != 0)
+        if (updateList.Any())
         {
             UpdateDefinition<Birthdays> allUpdates = Builders<Birthdays>.Update.Combine(updateList);
 
