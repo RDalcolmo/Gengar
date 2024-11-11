@@ -1,25 +1,27 @@
 ﻿using DnsClient.Internal;
 using Gengar.Models.Mongo;
+using Gengar.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
 namespace Gengar.Database;
 
 public class MongoConnector
 {
-    private readonly IConfiguration _configuration;
+    private readonly IOptions<MongoDbOptions> _options;
     private readonly IMongoDatabase Database;
     private readonly ILogger<MongoConnector> _logger;
 
-    public MongoConnector(IConfiguration configuration, ILogger<MongoConnector> logger)
+    public MongoConnector(IOptions<MongoDbOptions> options, ILogger<MongoConnector> logger)
     {
-        _configuration = configuration;
+        _options = options;
         _logger = logger;
 
         try
         {
-            var mcs = MongoClientSettings.FromUrl(new MongoUrl(_configuration["ConnectionString"]));
+            var mcs = MongoClientSettings.FromUrl(new MongoUrl(_options.Value.ConnectionString));
 
             MongoClient client = new(mcs);
 
