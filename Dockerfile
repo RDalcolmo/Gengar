@@ -1,7 +1,7 @@
-FROM mcr.microsoft.com/dotnet/runtime:8.0-bookworm-slim AS base
+FROM mcr.microsoft.com/dotnet/runtime:9.0.100-bookworm-slim AS base
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0-bookworm-slim AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0.100-bookworm-slim AS build
 WORKDIR /src
 COPY ["Gengar/Gengar.csproj", "Gengar/"]
 RUN dotnet restore "Gengar/Gengar.csproj"

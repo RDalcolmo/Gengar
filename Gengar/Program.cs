@@ -40,9 +40,9 @@ builder.ConfigureServices((hostContext, services) =>
         .AddSingleton<DiscordSocketClient>()
         .AddSingleton<MongoConnector>()
         .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
-        .AddSingleton<MongoConnector>()
         .AddSingleton<BirthdayService>()
-        .Configure<DiscordOptions>(hostContext.Configuration.GetSection(nameof(DiscordOptions)));
+        .Configure<DiscordOptions>(hostContext.Configuration.GetSection(nameof(DiscordOptions)))
+        .Configure<MongoDbOptions>(hostContext.Configuration.GetSection(nameof(MongoDbOptions)));
 
     services.AddHostedService<DiscordBotProcessor>();
 });
